@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+.uv/
+.env
+
+# Editors/OS
+.idea/
+.vscode/
+.DS_Store
+
+# Feast
+feature_repo/registry.db
+**/.feast/**
+
+# Data
+/data/
+feast_polygon_poc/data/

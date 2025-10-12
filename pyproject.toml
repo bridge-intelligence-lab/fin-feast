@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "feast-polygon-poc"
+version = "0.1.0"
+description = "Feast POC for FX/Crypto using Polygon (Offline + Online with streaming)"
+readme = "README.md"
+authors = [{name = "Your Name"}]
+requires-python = ">=3.11"
+dependencies = [
+  "feast>=0.38.0",
+  "redis>=5.0.0",
+  "pandas>=2.2.2",
+  "pyarrow>=15.0.0",
+  "numpy>=1.26",
+  "python-dotenv>=1.0.0",
+  "pydantic>=2.7.0",
+  "tenacity>=8.2.3",
+  "requests>=2.32.0",
+  "polygon-api-client>=1.12.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.1.0",
+  "ruff>=0.6.5",
+]
+
+[tool.setuptools.packages.find]
+include = ["feast_polygon_poc*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "UP", "B", "C4", "PIE", "PT", "RET", "SIM", "PTH", "PL" ]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
