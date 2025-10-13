@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+# Ensure project root is importable so `scripts` and top-level modules can be imported in tests
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+
 import os
 import subprocess
 from pathlib import Path
