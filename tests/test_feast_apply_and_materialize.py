@@ -28,7 +28,7 @@ def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     df = pd.DataFrame(
         {
-            "symbol": ["X:BTCUSD", "C:GBPUSD"],
+            "symbol": ["X:BTCUSD", "C:ETHUSD"],
             "event_timestamp": pd.to_datetime(["2025-01-01T00:00:00Z", "2025-01-01T00:00:00Z"], utc=True),
             "open": [1.0, 1.0],
             "high": [1.1, 1.1],
@@ -73,11 +73,9 @@ def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     spec.loader.exec_module(repo)  # type: ignore[attr-defined]
     objects = [
         repo.symbol,
-        repo.make_daily_ohlcv_source(),
         repo.make_minute_ohlcv_source(),
-        repo.daily_ohlcv_fv,
         repo.minute_ohlcv_fv,
-        # Omit ODFV to avoid dill serialization issues in this Feast version
+        # Apply only minute FV to avoid scanning large daily datasets
     ]
     fs.apply(objects)
     fs.materialize_incremental(pd.Timestamp.utcnow())
@@ -94,7 +92,7 @@ def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     res = fs.get_online_features(
         features=features,
-        entity_rows=[{"symbol": "X:BTCUSD"}, {"symbol": "C:GBPUSD"}],
+        entity_rows=[{"symbol": "X:BTCUSD"}, {"symbol": "C:ETHUSD"}],
     ).to_dict()
 
     expected_keys = ["open", "high", "low", "close", "vwap", "volume"]

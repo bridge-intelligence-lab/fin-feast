@@ -53,11 +53,18 @@ python scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
 ```
 
 ## Streaming minute bars
-Run the streaming ingestor (pushes to Redis immediately and writes Parquet):
+Preferred (no API key): Binance streaming ingestor writes Parquet and can push online:
+```bash
+python service/binance_stream_ingestor.py --symbols X:BTCUSD C:ETHUSD --push-online
+```
+Notes:
+- Maps Feast symbols to Binance pairs: X:BTCUSD -> btcusdt, C:ETHUSD -> ethusdt
+- Writes partitioned Parquet and optionally pushes to Redis via Feast
+
+Optional: Polygon streaming (requires POLYGON_API_KEY):
 ```bash
 python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-online
 ```
-Requires POLYGON_API_KEY in .env. Uses Polygon WebSocket for 1-minute aggregates where available; otherwise aggregates ticks locally.
 
 ## Repo layout
 See the repository tree in docs/ARCHITECTURE.md and the requirement.

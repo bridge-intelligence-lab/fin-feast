@@ -28,9 +28,9 @@ make up
 - Error: Package requires Python >=3.11
 - Fix: Use Python 3.11 venv or Conda env.
 
-### 5) Polygon rate limits / connectivity
-- Use built-in retries (tenacity) in batch fetcher; adjust backoff if needed.
-- For WebSocket, implement reconnect/backoff if connection drops. Current service is minimal; extend as needed.
+### 5) Streaming provider connectivity
+- Binance (recommended): No API key required. If you see connection drops, the ingestor auto-reconnects. Verify your network/firewall allows wss://stream.binance.com:9443.
+- Polygon (optional): Requires POLYGON_API_KEY. Use built-in retries (tenacity) in batch fetcher; extend WS reconnect/backoff as needed.
 
 ### 6) OnDemandFeatureView warnings
 - ODFV is experimental and not intended for heavy offline joins at scale. In this POC it’s used for lightweight stateless transforms only.

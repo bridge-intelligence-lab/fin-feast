@@ -15,12 +15,16 @@ This document describes the system architecture for the Fin Feast POC, including
 graph TD
   subgraph Polygon
     REST[REST Aggregates]
-    WS[WebSocket Minute Aggregates]
+    PWS[WS AM]
+  end
+  subgraph Binance
+    BWS[WS kline_1m]
   end
 
   GEN[generate_synthetic_data.py]
   FETCH[fetch_polygon_to_parquet.py]
-  STREAM[polygon_stream_ingestor.py]
+  STREAM_POLY[polygon_stream_ingestor.py]
+  STREAM_BINANCE[binance_stream_ingestor.py]
   FEAST[Feast Feature Repo]
   PARQUET[Parquet Offline Store]
   REDIS[(Redis Online Store)]
@@ -31,9 +35,12 @@ graph TD
   GEN --> PARQUET
   FETCH --> PARQUET
 
-  WS --> STREAM
-  STREAM --> PARQUET
-  STREAM --> REDIS
+  PWS --> STREAM_POLY
+  BWS --> STREAM_BINANCE
+  STREAM_POLY --> PARQUET
+  STREAM_POLY --> REDIS
+  STREAM_BINANCE --> PARQUET
+  STREAM_BINANCE --> REDIS
 
   PARQUET --> FEAST
   FEAST --> MAT
@@ -64,13 +71,15 @@ sequenceDiagram
 ## Streaming path (sequence)
 ```mermaid
 sequenceDiagram
+  participant BinanceWS as Binance WS (kline_1m)
   participant PolygonWS as Polygon WS (AM)
   participant Ingestor as Stream Ingestor
   participant Parquet
   participant Redis
   participant Service as Inference Service
 
-  PolygonWS-->>Ingestor: Minute bar event
+  BinanceWS-->>Ingestor: 1m kline event (btcusdt/ethusdt)
+  PolygonWS-->>Ingestor: Minute bar event (optional)
   Ingestor->>Ingestor: Compute indicators (rolling state)
   Ingestor->>Parquet: Write partitioned Parquet (idempotent)
   Ingestor->>Redis: Push latest feature row (optional)

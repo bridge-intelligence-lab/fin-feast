@@ -4,25 +4,25 @@ from datetime import timedelta
 import os
 
 from feast import FeatureView, Field, OnDemandFeatureView
-from feast.types import Float32, Float64, String
+from feast.types import Float64
 
 from entities import symbol
 from data_sources import make_daily_ohlcv_source, make_minute_ohlcv_source
 
 # Base features including precomputed indicators
 base_fields = [
-    Field(name="open", dtype=Float32),
-    Field(name="high", dtype=Float32),
-    Field(name="low", dtype=Float32),
-    Field(name="close", dtype=Float32),
-    Field(name="vwap", dtype=Float32),
-    Field(name="volume", dtype=Float32),
-    Field(name="return_1", dtype=Float32),
-    Field(name="ma_5", dtype=Float32),
-    Field(name="ma_20", dtype=Float32),
-    Field(name="vol_20", dtype=Float32),
-    Field(name="rsi_14", dtype=Float32),
-    Field(name="atr_14", dtype=Float32),
+    Field(name="open", dtype=Float64),
+    Field(name="high", dtype=Float64),
+    Field(name="low", dtype=Float64),
+    Field(name="close", dtype=Float64),
+    Field(name="vwap", dtype=Float64),
+    Field(name="volume", dtype=Float64),
+    Field(name="return_1", dtype=Float64),
+    Field(name="ma_5", dtype=Float64),
+    Field(name="ma_20", dtype=Float64),
+    Field(name="vol_20", dtype=Float64),
+    Field(name="rsi_14", dtype=Float64),
+    Field(name="atr_14", dtype=Float64),
 ]
 
 

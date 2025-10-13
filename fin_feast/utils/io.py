@@ -34,10 +34,14 @@ def normalize_schema(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["symbol"] = df["symbol"].astype(str)
     df["event_timestamp"] = pd.to_datetime(df["event_timestamp"], utc=True)
-    float_cols = ["open", "high", "low", "close", "vwap"]
+    float_cols = ["open", "high", "low", "close", "vwap", "volume"]
     for c in float_cols:
-        df[c] = pd.to_numeric(df[c], errors="coerce").astype(float)
-    df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype(float)
+    # Cast known indicator columns to float if present
+    for c in ["return_1", "ma_5", "ma_20", "vol_20", "rsi_14", "atr_14"]:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype(float)
     return df
 
 
@@ -47,13 +51,18 @@ def partition_path(base: Path, symbol: str, ts: datetime) -> Path:
 
 
 def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
-    """Write hive-partitioned Parquet and retain `symbol` column in files.
+    """Write hive-partitioned Parquet and retain partition columns in files.
 
-    Some downstream consumers (tests, historical joins) expect `symbol` to be present
-    in the file schema in addition to the partition path.
+    Dask requires that if any partition column is present inside the file, then
+    all partition columns must be present. We therefore retain both `symbol` and
+    `date` in the file schema in addition to the partition path.
     """
     ensure_columns(df)
     df = normalize_schema(df)
+    # Add date column derived from event_timestamp for in-file partition columns
+    df = df.copy()
+    df["date"] = df["event_timestamp"].dt.strftime("%Y-%m-%d")
+
     for (symbol, date), g in df.groupby(["symbol", df["event_timestamp"].dt.date]):
         part_dir = partition_path(base, symbol, pd.Timestamp(date, tz="UTC").to_pydatetime())
         part_dir.mkdir(parents=True, exist_ok=True)

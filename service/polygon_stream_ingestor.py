@@ -56,6 +56,7 @@ async def main_async() -> None:
 
     state = RollingState()
     state.warm_start(base, args.symbols)
+    seen_symbols = set()
 
     api_key = os.getenv("POLYGON_API_KEY")
     if not api_key:
@@ -71,17 +72,22 @@ async def main_async() -> None:
         for m in msgs:
             if m.get("ev") != AGG_CHANNEL:
                 continue
-            ts = pd.to_datetime(m["e"], unit="ms", utc=True)
-            sym = m["T"]
+            ts = pd.to_datetime(m.get("e") or m.get("t"), unit="ms", utc=True)
+            sym = m.get("T") or m.get("sym") or m.get("symbol")
+            if not sym:
+                continue
+            if sym not in seen_symbols:
+                logger.info("Received first %s message for %s", AGG_CHANNEL, sym)
+                seen_symbols.add(sym)
             bar = {
                 "symbol": sym,
                 "event_timestamp": ts,
-                "open": float(m["o"]),
-                "high": float(m["h"]),
-                "low": float(m["l"]),
-                "close": float(m["c"]),
-                "vwap": float(m.get("vw", m["c"])),
-                "volume": float(m["v"]),
+                "open": float(m.get("o") or m.get("open")),
+                "high": float(m.get("h") or m.get("high")),
+                "low": float(m.get("l") or m.get("low")),
+                "close": float(m.get("c") or m.get("close")),
+                "vwap": float((m.get("vw") or m.get("vwap") or m.get("c") or m.get("close"))),
+                "volume": float(m.get("v") or m.get("volume", 0.0)),
             }
             df = state.add_bar(bar)
             df_ind = add_indicators(df)

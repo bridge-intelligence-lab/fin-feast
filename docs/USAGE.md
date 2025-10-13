@@ -3,10 +3,12 @@
 This guide covers setup, environment, commands, and typical workflows for batch and streaming modes.
 
 ## Prerequisites
+
 - Python 3.11 (venv recommended)
 - Docker with docker-compose
 
 ## Setup
+
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
@@ -18,6 +20,7 @@ make up
 ```
 
 ## Environment variables (.env)
+
 - POLYGON_API_KEY=
 - REDIS_HOST=localhost
 - REDIS_PORT=6379
@@ -27,6 +30,7 @@ make up
 - MINUTE_RETENTION_DAYS=30
 
 ## Makefile targets
+
 - setup: install dev deps into current interpreter/venv
 - up / down: docker-compose up/down Redis
 - apply: feast apply
@@ -40,6 +44,7 @@ make up
 - lint / format: ruff check / ruff format
 
 ## Batch (happy path)
+
 ```bash
 # 1) Synthetic data
 python scripts/generate_synthetic_data.py --zone current --start 2025-09-01 --end 2025-10-12 --freq daily --symbols X:BTCUSD C:GBPUSD
@@ -54,30 +59,69 @@ python scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
 ```
 
 ## Streaming minute bars
+
+Preferred (no API key): Binance streaming ingestor writes Parquet and can push online:
+
 ```bash
-# Push latest bar to Redis immediately and write Parquet
-python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-online
+python service/binance_stream_ingestor.py --symbols X:BTCUSD C:ETHUSD --push-online
 ```
+
 Notes:
-- Requires POLYGON_API_KEY in .env
-- Uses Polygon WS AM (minute aggregates); adjust to aggregate ticks if needed
+
+- Maps Feast symbols to Binance pairs: X:BTCUSD -> btcusdt, C:ETHUSD -> ethusdt
+- Writes partitioned Parquet and can push to Redis via Feast
 - On restart, ingestor warm-starts rolling state from recent Parquet
 
+Optional: Polygon streaming (requires POLYGON_API_KEY):
+
+```bash
+python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-online
+```
+
+## Validate streaming and storage
+
+In a separate terminal while the ingestor is running:
+
+```bash
+python scripts/validate_streaming.py --symbols X:BTCUSD C:ETHUSD --zone current --check-online --provider binance
+```
+
+This verifies that:
+
+- WebSocket receives messages for the symbols (Binance by default)
+- Parquet partitions for today grow over time (rows or mtime)
+- Online features are present in Redis (if --check-online is provided)
+
+## Binance streaming (no API key required)
+
+```bash
+python service/binance_stream_ingestor.py --symbols X:BTCUSD C:ETHUSD --push-online
+```
+
+Notes:
+
+- Uses Binance combined streams for 1m klines (btcusdt, ethusdt) mapped to Feast symbols X:BTCUSD and C:ETHUSD
+- Writes Parquet and can push to Redis for immediate online features
+
 ## Historical training datasets
+
 ```bash
 FEAST_DATA_ZONE=experiment FEAST_EXPERIMENT_ID=<exp_id> \
-python scripts/build_training_dataset.py --zone experiment --exp-id <exp_id> --start 2024-08-12 --end 2025-08-12 --symbols X:BTCUSD C:GBPUSD --out data/derived/training.parquet
+python scripts/build_training_dataset.py --zone experiment --exp-id <exp_id> --start 2024-08-12 --end 2025-08-12 --symbols X:BTCUSD C:ETHUSD --out data/derived/training.parquet
 ```
+
 This uses Feast get_historical_features with both daily and minute FVs.
 
 ## Retention pruning
+
 ```bash
 python scripts/prune_retention.py --dry-run
 ```
+
 Add a confirm flag (or remove --dry-run) only after reviewing the planned deletions.
 
 ## Troubleshooting quick tips
+
 - If `feast apply` fails with Arrow schema merge errors, see TROUBLESHOOTING.md (Solution A).
 - If registry is stale/corrupt: remove feature_repo/registry.db and re-apply.
 - If Redis is empty: run materialize or enable --push-online in the streaming ingestor.
-

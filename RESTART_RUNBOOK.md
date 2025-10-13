@@ -101,13 +101,14 @@ python scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
 ```
 
 ## 6) Streaming minute bars (low-latency)
-Push latest minute bar to Redis immediately and write to Parquet for offline parity:
+Preferred (no API key): Binance streaming ingestor writes Parquet and can push online.
+```bash
+python service/binance_stream_ingestor.py --symbols X:BTCUSD C:ETHUSD --push-online
+```
+Optional (needs key): Polygon streaming
 ```bash
 python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-online
 ```
-Requirements:
-- `POLYGON_API_KEY` in `.env`
-- Uses Polygon WebSocket AM channel (minute aggregates). If minute aggregates aren’t available, extend the service to aggregate ticks locally.
 
 ## 7) Tests
 ```bash

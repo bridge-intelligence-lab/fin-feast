@@ -7,7 +7,7 @@ name = "fin-feast"
 version = "0.1.0"
 description = "Feast POC for FX/Crypto using Polygon (Offline + Online with streaming)"
 readme = "README.md"
-authors = [{name = "Your Name"}]
+authors = [{name = "Rodrigo Oliveira"}]
 requires-python = ">=3.11"
 dependencies = [
   "feast>=0.38.0",
