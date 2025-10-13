@@ -35,23 +35,84 @@ def parse_args() -> argparse.Namespace:
 def fetch_aggregates(
     client: RESTClient, ticker: str, start: str, end: str, timespan: str
 ) -> pd.DataFrame:
-    # Polygon format differs for crypto (X:) and forex (C:)
-    # polygon-api-client returns Aggregate objects; we convert to DataFrame
-    results = client.get_aggs(ticker=ticker, multiplier=1, timespan=timespan, from_=start, to=end)
-    if not results or not results.results:
-        return pd.DataFrame(columns=["ts", "o", "h", "l", "c", "v"])
+    """Fetch aggregates and normalize to a DataFrame.
+
+    Contract: RESTClient.get_aggs returns List[Agg] | HTTPResponse.
+    We support both without relying on non-contract attributes.
+    """
+    resp = client.get_aggs(
+        ticker=ticker,
+        multiplier=1,
+        timespan=timespan,
+        from_=start,
+        to=end,
+        adjusted=True,
+    )
+
+    # Case 1: List[Agg]
+    if isinstance(resp, (list, tuple)):
+        data_iter = resp
+    else:
+        # Case 2: HTTPResponse -> extract .data["results"] if present, or try .json()
+        payload = getattr(resp, "data", None)
+        if payload is None:
+            try:
+                payload = resp.json()  # type: ignore[attr-defined]
+            except Exception:
+                payload = None
+        if isinstance(payload, dict):
+            data_iter = payload.get("results") or []
+        elif isinstance(payload, (list, tuple)):
+            data_iter = payload
+        else:
+            data_iter = []
+
+    if not data_iter:
+        return pd.DataFrame(
+            columns=["event_timestamp", "open", "high", "low", "close", "vwap", "volume"]
+        )
+
     rows = []
-    for r in results.results:
-        ts = pd.to_datetime(r["t"], unit="ms", utc=True)
+    for r in data_iter:
+        # r may be a dict-like or Agg object with attributes
+        if isinstance(r, dict):
+            tval = r.get("t") or r.get("timestamp")
+            o = r.get("o") if r.get("o") is not None else r.get("open")
+            h = r.get("h") if r.get("h") is not None else r.get("high")
+            l = r.get("l") if r.get("l") is not None else r.get("low")
+            c = r.get("c") if r.get("c") is not None else r.get("close")
+            vw = r.get("vw") if r.get("vw") is not None else r.get("vwap")
+            v = r.get("v", 0.0) if r.get("v") is not None else r.get("volume", 0.0)
+        else:
+            tval = getattr(r, "t", None) or getattr(r, "timestamp", None)
+            o = getattr(r, "o", None) or getattr(r, "open", None)
+            h = getattr(r, "h", None) or getattr(r, "high", None)
+            l = getattr(r, "l", None) or getattr(r, "low", None)
+            c = getattr(r, "c", None) or getattr(r, "close", None)
+            vw = getattr(r, "vw", None) or getattr(r, "vwap", None)
+            v = getattr(r, "v", 0.0) or getattr(r, "volume", 0.0)
+        if tval is None:
+            continue
+        # Polygon REST may return seconds or milliseconds depending on endpoint; detect scale
+        try:
+            tval_int = int(tval)
+        except Exception:
+            # In case of datetime-like input, let pandas parse it directly
+            ts = pd.to_datetime(tval, utc=True)
+        else:
+            unit = "s" if tval_int < 10_000_000_000 else "ms"
+            ts = pd.to_datetime(tval_int, unit=unit, utc=True)
+        c = 0.0 if c is None else c
+        vw = c if vw is None else vw
         rows.append(
             {
                 "event_timestamp": ts,
-                "open": float(r["o"]),
-                "high": float(r["h"]),
-                "low": float(r["l"]),
-                "close": float(r["c"]),
-                "vwap": float(r.get("vw", r["c"])),
-                "volume": float(r["v"]),
+                "open": float(o),
+                "high": float(h),
+                "low": float(l),
+                "close": float(c),
+                "vwap": float(vw),
+                "volume": float(v),
             }
         )
     return pd.DataFrame(rows)
@@ -65,10 +126,14 @@ def main() -> None:
 
     client = RESTClient()
 
+    # Map Feast symbols to Polygon tickers where needed
+    from fin_feast.utils.symbols import to_polygon_ticker
+
     for sym in args.symbols:
+        ticker = to_polygon_ticker(sym)
         ts_df = fetch_aggregates(
             client,
-            ticker=sym,
+            ticker=ticker,
             start=args.start,
             end=args.end,
             timespan="day" if args.freq == "daily" else "minute",
