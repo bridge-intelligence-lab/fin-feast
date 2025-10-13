@@ -2,7 +2,18 @@
 
 Offline-first Feast pipeline with Redis online store, using Polygon for data. Supports both batch (REST) and low-latency streaming (WebSocket) for minute bars, plus immutable experiment snapshots.
 
-## Features
+## Table of Contents
+- Architecture: docs/ARCHITECTURE.md
+- Usage: docs/USAGE.md
+- Features: docs/FEATURES.md
+- Testing: docs/TESTING.md
+- Operations: docs/OPERATIONS.md
+- Security: docs/SECURITY.md
+- Design decisions: docs/DESIGN_DECISIONS.md
+- Troubleshooting: docs/TROUBLESHOOTING.md
+- Restart runbook: RESTART_RUNBOOK.md
+
+## Highlights
 - Assets: X:BTCUSD (crypto), C:GBPUSD (forex)
 - Offline store: Parquet (current zone + experiments)
 - Online store: Redis (docker-compose)
@@ -11,7 +22,7 @@ Offline-first Feast pipeline with Redis online store, using Polygon for data. Su
   - Precomputed (offline): return_1, ma_5, ma_20, vol_20, rsi_14, atr_14
   - On-demand (stateless): hlc3, ohlc4, vol_log, spread, body, vwap_premium
 - Modes: current vs experiments snapshots (immutable), switch via env
-- Materialize-incremental every 60s for batch mode; streaming ingestor pushes to Redis on each new bar
+- Materialize-incremental every 60s for batch mode; streaming ingestor can push online per bar
 
 ## Quickstart
 1. Copy env
@@ -44,17 +55,15 @@ python scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
 ## Streaming minute bars
 Run the streaming ingestor (pushes to Redis immediately and writes Parquet):
 ```bash
-python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD
+python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-online
 ```
 Requires POLYGON_API_KEY in .env. Uses Polygon WebSocket for 1-minute aggregates where available; otherwise aggregates ticks locally.
 
 ## Repo layout
-See the repository tree in the requirement section.
+See the repository tree in docs/ARCHITECTURE.md and the requirement.
 
 ## Testing
 - `pytest -q` runs the suite. Tests will spin up Redis via docker-compose automatically.
 
 ## Troubleshooting
-- Feast registry lock issues: remove `feature_repo/registry.db` and re-apply.
-- Redis not reachable: ensure `make up` and that REDIS_HOST/PORT in `.env` match.
-
+- See docs/TROUBLESHOOTING.md and RESTART_RUNBOOK.md
