@@ -56,8 +56,8 @@ test:
 	pytest -q
 
 materialize:
-	@Z=${FEAST_EXPERIMENT_ID:-}; \
-	$(PY) scripts/materialize_incremental.py --zone ${FEAST_DATA_ZONE:-current} --exp-id "$Z"
+	@Z=$${FEAST_EXPERIMENT_ID:-}; \
+	$(PY) scripts/materialize_incremental.py --zone $${FEAST_DATA_ZONE:-current} --exp-id "$$Z"
 
 synth-daily:
 	$(PY) scripts/generate_synthetic_data.py --zone current --start $$(date -u -d '400 days ago' +%F) --end $$(date -u +%F) --freq daily --symbols X:BTCUSD C:GBPUSD
