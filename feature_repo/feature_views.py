@@ -53,6 +53,7 @@ minute_ohlcv_fv = FeatureView(
 
 # On-demand stateless transforms derived from minute features only to avoid column collisions
 
+
 def stateless_transforms(df):  # type: ignore[no-untyped-def]
     import numpy as np
     import pandas as pd

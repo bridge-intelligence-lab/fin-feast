@@ -17,6 +17,7 @@ def test_parquet_partition_detection(tmp_path: Path, monkeypatch):
     monkeypatch.setattr("fin_feast.utils.env.resolve_base_path", fake_resolve_base_path)
 
     import sys
+
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from scripts.validate_streaming import _partition_path, _read_partition_rows
 
@@ -30,34 +31,38 @@ def test_parquet_partition_detection(tmp_path: Path, monkeypatch):
     assert _read_partition_rows(p) == 0
 
     # Write one row, then another, verify counts grow
-    df1 = pd.DataFrame([
-        {
-            "symbol": symbol,
-            "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
-            "open": 1.0,
-            "high": 1.0,
-            "low": 1.0,
-            "close": 1.0,
-            "vwap": 1.0,
-            "volume": 1.0,
-        }
-    ])
+    df1 = pd.DataFrame(
+        [
+            {
+                "symbol": symbol,
+                "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
+                "open": 1.0,
+                "high": 1.0,
+                "low": 1.0,
+                "close": 1.0,
+                "vwap": 1.0,
+                "volume": 1.0,
+            }
+        ]
+    )
     write_parquet_partitioned(base / "minute", df1)
     c1 = _read_partition_rows(p)
     assert c1 == 1
 
-    df2 = pd.DataFrame([
-        {
-            "symbol": symbol,
-            "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
-            "open": 2.0,
-            "high": 2.0,
-            "low": 2.0,
-            "close": 2.0,
-            "vwap": 2.0,
-            "volume": 2.0,
-        }
-    ])
+    df2 = pd.DataFrame(
+        [
+            {
+                "symbol": symbol,
+                "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
+                "open": 2.0,
+                "high": 2.0,
+                "low": 2.0,
+                "close": 2.0,
+                "vwap": 2.0,
+                "volume": 2.0,
+            }
+        ]
+    )
     write_parquet_partitioned(base / "minute", df2)
     c2 = _read_partition_rows(p)
     assert c2 == 2

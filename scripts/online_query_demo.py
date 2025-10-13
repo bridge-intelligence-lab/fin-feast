@@ -13,8 +13,12 @@ logger = get_logger(__name__)
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--symbols", nargs="+", required=True)
-    p.add_argument("--with-odfv", action="store_true", default=os.getenv("FEAST_ENABLE_ODFV") == "1",
-                   help="Include on-demand (derived_stateless_fv) features if available")
+    p.add_argument(
+        "--with-odfv",
+        action="store_true",
+        default=os.getenv("FEAST_ENABLE_ODFV") == "1",
+        help="Include on-demand (derived_stateless_fv) features if available",
+    )
     return p.parse_args()
 
 

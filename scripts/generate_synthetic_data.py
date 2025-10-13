@@ -51,13 +51,19 @@ def synthetic_series(start_price: float, n: int, vol: float = 0.02) -> np.ndarra
 
 
 def gen_bars(symbol: str, ts_list: List[datetime], start_price: float) -> pd.DataFrame:
-    close = synthetic_series(start_price, len(ts_list), vol=0.001 if (ts_list[1]-ts_list[0]).seconds<3600 else 0.02)
-    df = pd.DataFrame({
-        "symbol": symbol,
-        "event_timestamp": pd.to_datetime(ts_list, utc=True),
-        "close": close,
-    })
-    df["open"] = df["close"].shift(1).fillna(df["close"]) * (1 + np.random.normal(0, 0.0005, len(df)))
+    close = synthetic_series(
+        start_price, len(ts_list), vol=0.001 if (ts_list[1] - ts_list[0]).seconds < 3600 else 0.02
+    )
+    df = pd.DataFrame(
+        {
+            "symbol": symbol,
+            "event_timestamp": pd.to_datetime(ts_list, utc=True),
+            "close": close,
+        }
+    )
+    df["open"] = df["close"].shift(1).fillna(df["close"]) * (
+        1 + np.random.normal(0, 0.0005, len(df))
+    )
     hl_spread = np.abs(np.random.normal(0.001, 0.0005, len(df))) * df["close"]
     df["high"] = df[["open", "close"]].max(axis=1) + hl_spread
     df["low"] = df[["open", "close"]].min(axis=1) - hl_spread

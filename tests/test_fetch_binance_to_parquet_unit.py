@@ -48,7 +48,12 @@ def test_fetch_klines_and_write(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     base = fake_resolve("current") / "minute"
 
     # Build DataFrame similar to main flow
-    df = fb._fetch_klines("BTCUSDT", "1m", datetime(2025, 1, 1, tzinfo=timezone.utc), datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc))
+    df = fb._fetch_klines(
+        "BTCUSDT",
+        "1m",
+        datetime(2025, 1, 1, tzinfo=timezone.utc),
+        datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc),
+    )
     assert not df.empty
     df.insert(0, "symbol", "X:BTCUSD")
     df["vwap"] = (df["high"] + df["low"] + df["close"]) / 3.0

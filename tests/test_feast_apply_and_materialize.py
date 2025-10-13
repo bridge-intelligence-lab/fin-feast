@@ -29,7 +29,9 @@ def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     df = pd.DataFrame(
         {
             "symbol": ["X:BTCUSD", "C:ETHUSD"],
-            "event_timestamp": pd.to_datetime(["2025-01-01T00:00:00Z", "2025-01-01T00:00:00Z"], utc=True),
+            "event_timestamp": pd.to_datetime(
+                ["2025-01-01T00:00:00Z", "2025-01-01T00:00:00Z"], utc=True
+            ),
             "open": [1.0, 1.0],
             "high": [1.1, 1.1],
             "low": [0.9, 0.9],
@@ -65,6 +67,7 @@ def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     # Apply all repo objects explicitly to support current Feast version
     import importlib.util
     import sys
+
     repo_dir = project_root / "feature_repo"
     sys.path.insert(0, str(repo_dir))
     spec = importlib.util.spec_from_file_location("repo", repo_dir / "repo.py")

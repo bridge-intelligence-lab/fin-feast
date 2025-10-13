@@ -43,7 +43,9 @@ def _file_mtime(path: Path) -> float:
         return 0.0
 
 
-def check_parquet_growth(zone: str, symbols: List[str], freq: str = "minute", poll_secs: int = 10) -> Tuple[bool, Dict[str, Tuple[int, int, float, float]]]:
+def check_parquet_growth(
+    zone: str, symbols: List[str], freq: str = "minute", poll_secs: int = 10
+) -> Tuple[bool, Dict[str, Tuple[int, int, float, float]]]:
     base = resolve_base_path(zone, None)
     today = _today_utc_date()
     before_rows: Dict[str, int] = {}
@@ -55,7 +57,13 @@ def check_parquet_growth(zone: str, symbols: List[str], freq: str = "minute", po
         p = _partition_path(base, sym, freq, today)
         before_rows[sym] = _read_partition_rows(p)
         before_mtime[sym] = _file_mtime(p)
-        logger.info("Parquet before for %s: rows=%d mtime=%s (%s)", sym, before_rows[sym], before_mtime[sym], p)
+        logger.info(
+            "Parquet before for %s: rows=%d mtime=%s (%s)",
+            sym,
+            before_rows[sym],
+            before_mtime[sym],
+            p,
+        )
 
     time.sleep(poll_secs)
 
@@ -63,10 +71,18 @@ def check_parquet_growth(zone: str, symbols: List[str], freq: str = "minute", po
         p = _partition_path(base, sym, freq, today)
         after_rows[sym] = _read_partition_rows(p)
         after_mtime[sym] = _file_mtime(p)
-        logger.info("Parquet after for %s: rows=%d mtime=%s (%s)", sym, after_rows[sym], after_mtime[sym], p)
+        logger.info(
+            "Parquet after for %s: rows=%d mtime=%s (%s)", sym, after_rows[sym], after_mtime[sym], p
+        )
 
-    grew = {sym: (before_rows[sym], after_rows[sym], before_mtime[sym], after_mtime[sym]) for sym in symbols}
-    ok = all((after_rows[sym] > before_rows[sym]) or (after_mtime[sym] > before_mtime[sym]) for sym in symbols)
+    grew = {
+        sym: (before_rows[sym], after_rows[sym], before_mtime[sym], after_mtime[sym])
+        for sym in symbols
+    }
+    ok = all(
+        (after_rows[sym] > before_rows[sym]) or (after_mtime[sym] > before_mtime[sym])
+        for sym in symbols
+    )
     return ok, grew
 
 
@@ -86,7 +102,9 @@ class _WSCounter:
                 self.counts[sym] += 1
 
 
-def check_ws_receive(symbols: List[str], timeout: int = 20, provider: str = "binance") -> Tuple[bool, Dict[str, int]]:
+def check_ws_receive(
+    symbols: List[str], timeout: int = 20, provider: str = "binance"
+) -> Tuple[bool, Dict[str, int]]:
     counter = _WSCounter(symbols)
 
     if provider == "binance":
@@ -225,7 +243,9 @@ def check_ws_receive(symbols: List[str], timeout: int = 20, provider: str = "bin
     return ok, counter.counts
 
 
-def check_online_features(symbols: List[str], repo_path: str | None = None) -> Tuple[bool, Dict[str, bool]]:
+def check_online_features(
+    symbols: List[str], repo_path: str | None = None
+) -> Tuple[bool, Dict[str, bool]]:
     if repo_path is None:
         # Resolve repo root relative to this file
         repo_path = str((Path(__file__).resolve().parents[1] / "feature_repo").resolve())
@@ -266,13 +286,20 @@ def check_online_features(symbols: List[str], repo_path: str | None = None) -> T
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Validate streaming (Binance/Polygon), Parquet growth, and online store")
+    p = argparse.ArgumentParser(
+        description="Validate streaming (Binance/Polygon), Parquet growth, and online store"
+    )
     p.add_argument("--symbols", nargs="+", required=True)
     p.add_argument("--zone", default="current", choices=["current", "experiment"], help="Data zone")
     p.add_argument("--ws-timeout", type=int, default=20, help="Seconds to wait for WS messages")
     p.add_argument("--poll-secs", type=int, default=10, help="Seconds between Parquet row polls")
     p.add_argument("--check-online", action="store_true", help="Validate online features in Redis")
-    p.add_argument("--provider", choices=["binance", "polygon"], default="binance", help="WS provider to validate")
+    p.add_argument(
+        "--provider",
+        choices=["binance", "polygon"],
+        default="binance",
+        help="WS provider to validate",
+    )
     return p.parse_args()
 
 
@@ -290,11 +317,19 @@ def main():
         overall_ok = False
 
     # 2) Parquet partition growth
-    pq_ok, growth = check_parquet_growth(args.zone, args.symbols, freq="minute", poll_secs=args.poll_secs)
+    pq_ok, growth = check_parquet_growth(
+        args.zone, args.symbols, freq="minute", poll_secs=args.poll_secs
+    )
     if pq_ok:
-        logger.info("Parquet growth OK. before->after (rows_before, rows_after, mtime_before, mtime_after): %s", growth)
+        logger.info(
+            "Parquet growth OK. before->after (rows_before, rows_after, mtime_before, mtime_after): %s",
+            growth,
+        )
     else:
-        logger.error("Parquet growth FAILED. before->after (rows_before, rows_after, mtime_before, mtime_after): %s", growth)
+        logger.error(
+            "Parquet growth FAILED. before->after (rows_before, rows_after, mtime_before, mtime_after): %s",
+            growth,
+        )
         overall_ok = False
 
     # 3) Online check (optional)

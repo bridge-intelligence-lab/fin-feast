@@ -9,11 +9,15 @@ def compute_return_1(df: pd.DataFrame) -> pd.Series:
 
 
 def compute_ma(df: pd.DataFrame, window: int) -> pd.Series:
-    return df.groupby("symbol")["close"].transform(lambda s: s.rolling(window, min_periods=window).mean())
+    return df.groupby("symbol")["close"].transform(
+        lambda s: s.rolling(window, min_periods=window).mean()
+    )
 
 
 def compute_vol(df: pd.DataFrame, window: int) -> pd.Series:
-    return df.groupby("symbol")["close"].transform(lambda s: s.rolling(window, min_periods=window).std(ddof=0))
+    return df.groupby("symbol")["close"].transform(
+        lambda s: s.rolling(window, min_periods=window).std(ddof=0)
+    )
 
 
 def compute_rsi(df: pd.DataFrame, window: int = 14) -> pd.Series:

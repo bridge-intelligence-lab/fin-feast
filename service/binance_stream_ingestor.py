@@ -23,7 +23,6 @@ BINANCE_WS = "wss://stream.binance.com:9443/stream?streams={streams}"
 INTERVAL = "1m"
 
 
-@dataclass
 from fin_feast.utils.symbols import SymbolMap, to_binance_symbol
 
 
@@ -35,8 +34,12 @@ def map_symbols(symbols: List[str]) -> List[SymbolMap]:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Binance 1m kline streamer -> Parquet (+optional online)")
-    p.add_argument("--symbols", nargs="+", required=True, help="Feast symbols, e.g., X:BTCUSD C:ETHUSD")
+    p = argparse.ArgumentParser(
+        description="Binance 1m kline streamer -> Parquet (+optional online)"
+    )
+    p.add_argument(
+        "--symbols", nargs="+", required=True, help="Feast symbols, e.g., X:BTCUSD C:ETHUSD"
+    )
     p.add_argument("--zone", choices=["current"], default="current")
     p.add_argument("--push-online", action="store_true", help="Push latest to Redis via Feast")
     return p.parse_args()
@@ -61,7 +64,10 @@ async def stream_binance():
     fs: FeatureStore | None = None
     if args.push_online:
         from pathlib import Path
-        fs = FeatureStore(repo_path=str((Path(__file__).resolve().parents[1] / "feature_repo").resolve()))
+
+        fs = FeatureStore(
+            repo_path=str((Path(__file__).resolve().parents[1] / "feature_repo").resolve())
+        )
 
     streams = "/".join([f"{sm.binance_symbol}@kline_{INTERVAL}" for sm in sym_maps])
     url = BINANCE_WS.format(streams=streams)
@@ -101,7 +107,9 @@ async def stream_binance():
                 # Accumulate with any previous to compute indicators
                 df_prev = recent.get(feast_symbol, pd.DataFrame())
                 df_new = pd.concat([df_prev, pd.DataFrame([bar])], ignore_index=True)
-                df_new = df_new.sort_values("event_timestamp").drop_duplicates(["symbol", "event_timestamp"], keep="last")
+                df_new = df_new.sort_values("event_timestamp").drop_duplicates(
+                    ["symbol", "event_timestamp"], keep="last"
+                )
                 df_new = df_new.tail(200)  # keep window
                 recent[feast_symbol] = df_new
 
@@ -112,20 +120,49 @@ async def stream_binance():
                 logger.info("Wrote latest kline to Parquet for %s at %s", feast_symbol, ts)
 
                 if fs is not None:
-                    # Fallback 1: direct write using older Feast signature known to work on this env
+                    # Push latest row to online store using current Feast signature
+                    row = latest.iloc[0].to_dict()
+                    # Normalize NaNs to None
+                    clean = {
+                        k: (None if (isinstance(v, float) and (pd.isna(v))) else v)
+                        for k, v in row.items()
+                    }
+                    # Drop event_timestamp; online store doesn't require it
+                    clean.pop("event_timestamp", None)
+                    # Ensure entity is present
+                    assert "symbol" in clean, "symbol is required for online write"
+                    # Keep only FV-defined features plus entity
+                    fv_features = [
+                        "open",
+                        "high",
+                        "low",
+                        "close",
+                        "vwap",
+                        "volume",
+                        "return_1",
+                        "ma_5",
+                        "ma_20",
+                        "vol_20",
+                        "rsi_14",
+                        "atr_14",
+                    ]
+                    payload = {
+                        "symbol": clean["symbol"],
+                        **{k: clean.get(k) for k in fv_features if k in clean},
+                    }
+                    df_payload = pd.DataFrame([payload])
                     try:
-                        row = latest.iloc[0].to_dict()
-                        values = {k: (None if (isinstance(v, float) and (np.isnan(v))) else v) for k, v in row.items()}
-                        fs.write_to_online_store(table="minute_ohlcv_fv", values=values)
-                        logger.info("Pushed latest bar to Redis for %s via direct write", feast_symbol)
+                        fs.write_to_online_store(
+                            feature_view_name="minute_ohlcv_fv",
+                            df=df_payload,
+                        )
+                        logger.info(
+                            "Pushed latest bar to Redis for %s via write_to_online_store",
+                            feast_symbol,
+                        )
                     except Exception as e:
-                        logger.error("Direct online write failed: %s", e)
-                        # Fallback 2: materialize incremental
-                        try:
-                            fs.materialize_incremental(pd.Timestamp.utcnow())
-                            logger.info("Materialized incremental to online for latest data")
-                        except Exception as e2:
-                            logger.error("Online materialize failed: %s", e2)
+                        # Log but do not break streaming loop
+                        logger.error("Online write failed for %s: %s", feast_symbol, e)
         except Exception as e:
             logger.warning("WS error/reconnect: %s", e)
             await asyncio.sleep(2)

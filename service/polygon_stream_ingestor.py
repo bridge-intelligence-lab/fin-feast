@@ -66,7 +66,9 @@ async def main_async() -> None:
     if args.push_online:
         fs = FeatureStore(repo_path=str(Path(__file__).resolve().parents[1] / "feature_repo"))
 
-    ws = WebSocketClient(subscriptions=[f"{AGG_CHANNEL}.{s}" for s in args.symbols], api_key=api_key)
+    ws = WebSocketClient(
+        subscriptions=[f"{AGG_CHANNEL}.{s}" for s in args.symbols], api_key=api_key
+    )
 
     async def handle_msg(msgs: List[dict]) -> None:  # type: ignore[type-arg]
         for m in msgs:
@@ -98,12 +100,20 @@ async def main_async() -> None:
             # Optionally push to online store for immediate inference
             if fs is not None:
                 row = latest.iloc[0].to_dict()
+                # Normalize NaNs and drop event_timestamp
+                clean = {k: (None if (isinstance(v, float) and (np.isnan(v))) else v) for k, v in row.items()}
+                clean.pop("event_timestamp", None)
+                # Build payload restricted to FV features + entity
+                fv_features = [
+                    "open", "high", "low", "close", "vwap", "volume",
+                    "return_1", "ma_5", "ma_20", "vol_20", "rsi_14", "atr_14",
+                ]
+                assert "symbol" in clean, "symbol is required for online write"
+                payload = {"symbol": clean["symbol"], **{k: clean.get(k) for k in fv_features if k in clean}}
+                df_payload = pd.DataFrame([payload])
                 fs.write_to_online_store(
-                    table="minute_ohlcv_fv",
-                    values={
-                        "symbol": row.pop("symbol"),
-                        **{k: (None if (isinstance(v, float) and (np.isnan(v))) else v) for k, v in row.items()},
-                    },
+                    feature_view_name="minute_ohlcv_fv",
+                    df=df_payload,
                 )
                 logger.info("Pushed latest bar to Redis for %s", sym)
 

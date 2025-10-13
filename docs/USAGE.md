@@ -106,11 +106,20 @@ Notes:
 ## Historical training datasets
 
 ```bash
-FEAST_DATA_ZONE=experiment FEAST_EXPERIMENT_ID=<exp_id> \
-python scripts/build_training_dataset.py --zone experiment --exp-id <exp_id> --start 2024-08-12 --end 2025-08-12 --symbols X:BTCUSD C:ETHUSD --out data/derived/training.parquet
+export FEAST_DATA_ZONE=experiment
+export FEAST_EXPERIMENT_ID=my_exp_$(date -u +%Y%m%d)
+
+python scripts/build_training_dataset.py \
+  --zone experiment \
+  --exp-id "$FEAST_EXPERIMENT_ID" \
+  --start 2024-08-12 --end 2025-08-12 \
+  --symbols X:BTCUSD C:ETHUSD \
+  --out data/derived/training.parquet
 ```
 
 This uses Feast get_historical_features with both daily and minute FVs.
+
+See docs/E2E_SCENARIOS.md for a full set of copy-paste end-to-end flows, including Binance batch import.
 
 ## Retention pruning
 

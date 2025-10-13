@@ -31,7 +31,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--start", required=True, help="ISO timestamp/date")
     p.add_argument("--end", required=True, help="ISO timestamp/date")
     p.add_argument("--freq", choices=["daily", "minute"], required=True)
-    p.add_argument("--symbols", nargs="+", required=True, help="Feast symbols, e.g., X:BTCUSD C:ETHUSD")
+    p.add_argument(
+        "--symbols", nargs="+", required=True, help="Feast symbols, e.g., X:BTCUSD C:ETHUSD"
+    )
     return p.parse_args()
 
 
@@ -65,14 +67,16 @@ def _fetch_klines(symbol: str, interval: str, start: datetime, end: datetime) ->
     for k in data:
         # Kline array indices: open time, open, high, low, close, volume, close time, ...
         ts = pd.to_datetime(k[0], unit="ms", utc=True)
-        rows.append({
-            "event_timestamp": ts,
-            "open": float(k[1]),
-            "high": float(k[2]),
-            "low": float(k[3]),
-            "close": float(k[4]),
-            "volume": float(k[5]),
-        })
+        rows.append(
+            {
+                "event_timestamp": ts,
+                "open": float(k[1]),
+                "high": float(k[2]),
+                "low": float(k[3]),
+                "close": float(k[4]),
+                "volume": float(k[5]),
+            }
+        )
     return pd.DataFrame(rows)
 
 

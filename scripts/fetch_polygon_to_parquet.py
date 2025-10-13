@@ -32,7 +32,9 @@ def parse_args() -> argparse.Namespace:
 
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=30), stop=stop_after_attempt(5))
-def fetch_aggregates(client: RESTClient, ticker: str, start: str, end: str, timespan: str) -> pd.DataFrame:
+def fetch_aggregates(
+    client: RESTClient, ticker: str, start: str, end: str, timespan: str
+) -> pd.DataFrame:
     # Polygon format differs for crypto (X:) and forex (C:)
     # polygon-api-client returns Aggregate objects; we convert to DataFrame
     results = client.get_aggs(ticker=ticker, multiplier=1, timespan=timespan, from_=start, to=end)
@@ -41,15 +43,17 @@ def fetch_aggregates(client: RESTClient, ticker: str, start: str, end: str, time
     rows = []
     for r in results.results:
         ts = pd.to_datetime(r["t"], unit="ms", utc=True)
-        rows.append({
-            "event_timestamp": ts,
-            "open": float(r["o"]),
-            "high": float(r["h"]),
-            "low": float(r["l"]),
-            "close": float(r["c"]),
-            "vwap": float(r.get("vw", r["c"])),
-            "volume": float(r["v"]),
-        })
+        rows.append(
+            {
+                "event_timestamp": ts,
+                "open": float(r["o"]),
+                "high": float(r["h"]),
+                "low": float(r["l"]),
+                "close": float(r["c"]),
+                "vwap": float(r.get("vw", r["c"])),
+                "volume": float(r["v"]),
+            }
+        )
     return pd.DataFrame(rows)
 
 

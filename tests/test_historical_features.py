@@ -65,20 +65,23 @@ def test_historical_features(tmp_path: Path, monkeypatch) -> None:
     # Ensure registry contains feature views for this run
     import importlib.util
     import sys
+
     repo_dir = project_root / "feature_repo"
     sys.path.insert(0, str(repo_dir))
     spec = importlib.util.spec_from_file_location("repo", repo_dir / "repo.py")
     assert spec and spec.loader
     repo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(repo)  # type: ignore[attr-defined]
-    fs.apply([
-        repo.symbol,
-        repo.make_daily_ohlcv_source(),
-        repo.make_minute_ohlcv_source(),
-        repo.daily_ohlcv_fv,
-        repo.minute_ohlcv_fv,
-        # Omit ODFV to keep registry simple for this test
-    ])
+    fs.apply(
+        [
+            repo.symbol,
+            repo.make_daily_ohlcv_source(),
+            repo.make_minute_ohlcv_source(),
+            repo.daily_ohlcv_fv,
+            repo.minute_ohlcv_fv,
+            # Omit ODFV to keep registry simple for this test
+        ]
+    )
 
     entity_df = pd.DataFrame(
         [
@@ -86,7 +89,7 @@ def test_historical_features(tmp_path: Path, monkeypatch) -> None:
             {"symbol": "C:ETHUSD", "event_timestamp": pd.Timestamp("2025-01-02T00:00:00Z")},
         ]
     )
-    entity_df["symbol"] = pd.Categorical(entity_df["symbol"], categories=["X:BTCUSD", "C:ETHUSD"]) 
+    entity_df["symbol"] = pd.Categorical(entity_df["symbol"], categories=["X:BTCUSD", "C:ETHUSD"])
 
     features = [
         "daily_ohlcv_fv:open",

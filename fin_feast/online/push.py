@@ -6,7 +6,9 @@ import pandas as pd
 from feast import FeatureStore
 
 
-def push_rows_to_online(store_repo_path: str, table_name: str, df: pd.DataFrame, entity_keys: Iterable[str]) -> None:
+def push_rows_to_online(
+    store_repo_path: str, table_name: str, df: pd.DataFrame, entity_keys: Iterable[str]
+) -> None:
     """Push rows directly to Feast online store.
 
     Tries multiple Feast API variants for write_to_online_store to support different versions.
@@ -49,7 +51,9 @@ def push_rows_to_online(store_repo_path: str, table_name: str, df: pd.DataFrame,
         except Exception as e:
             last_err = e
         try:
-            fs.write_to_online_store(feature_view_name=table_name, entity_rows=[rec])  # keyword (newer)
+            fs.write_to_online_store(
+                feature_view_name=table_name, entity_rows=[rec]
+            )  # keyword (newer)
             continue
         except Exception as e:
             last_err = e

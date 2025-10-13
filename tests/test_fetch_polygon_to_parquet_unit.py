@@ -26,4 +26,6 @@ def test_fetch_aggregates_basic():
     client = _ClientMock(_Res(rows))
     df = fetch_aggregates(client, "X:BTCUSD", "2025-01-01", "2025-01-02", "minute")
     assert not df.empty
-    assert set(["event_timestamp", "open", "high", "low", "close", "vwap", "volume"]).issubset(df.columns)
+    assert set(["event_timestamp", "open", "high", "low", "close", "vwap", "volume"]).issubset(
+        df.columns
+    )

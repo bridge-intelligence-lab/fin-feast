@@ -55,33 +55,39 @@ def test_check_parquet_growth_zero_poll(tmp_path: Path, monkeypatch):
     def writer():
         # Ensure we write after check_parquet_growth has taken the 'before' snapshot
         time.sleep(0.05)
-        df1 = pd.DataFrame([
-            {
-                "symbol": sym,
-                "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
-                "open": 1.0,
-                "high": 1.0,
-                "low": 1.0,
-                "close": 1.0,
-                "vwap": 1.0,
-                "volume": 1.0,
-            }
-        ])
+        df1 = pd.DataFrame(
+            [
+                {
+                    "symbol": sym,
+                    "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
+                    "open": 1.0,
+                    "high": 1.0,
+                    "low": 1.0,
+                    "close": 1.0,
+                    "vwap": 1.0,
+                    "volume": 1.0,
+                }
+            ]
+        )
         write_parquet_partitioned(base / "minute", df1)
         # Write another row to strengthen the growth signal
         time.sleep(0.05)
-        df2 = pd.DataFrame([
-            {
-                "symbol": sym,
-                "event_timestamp": pd.Timestamp(datetime.now(timezone.utc) + pd.Timedelta(seconds=1)),
-                "open": 2.0,
-                "high": 2.0,
-                "low": 2.0,
-                "close": 2.0,
-                "vwap": 2.0,
-                "volume": 2.0,
-            }
-        ])
+        df2 = pd.DataFrame(
+            [
+                {
+                    "symbol": sym,
+                    "event_timestamp": pd.Timestamp(
+                        datetime.now(timezone.utc) + pd.Timedelta(seconds=1)
+                    ),
+                    "open": 2.0,
+                    "high": 2.0,
+                    "low": 2.0,
+                    "close": 2.0,
+                    "vwap": 2.0,
+                    "volume": 2.0,
+                }
+            ]
+        )
         write_parquet_partitioned(base / "minute", df2)
 
     t = threading.Thread(target=writer, daemon=True)

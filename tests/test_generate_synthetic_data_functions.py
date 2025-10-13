@@ -26,7 +26,11 @@ def test_synthetic_series_shape_positive():
 
 
 def test_gen_bars_required_columns():
-    ts = daterange(datetime(2025, 1, 1, tzinfo=timezone.utc), datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc), "minute")
+    ts = daterange(
+        datetime(2025, 1, 1, tzinfo=timezone.utc),
+        datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc),
+        "minute",
+    )
     df = gen_bars("X:BTCUSD", ts, 100.0)
     for c in ["symbol", "event_timestamp", "open", "high", "low", "close", "vwap", "volume"]:
         assert c in df.columns

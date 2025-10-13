@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import os
 import subprocess
 from datetime import datetime, timezone
@@ -10,6 +11,13 @@ from feast import FeatureStore
 from fin_feast.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Apply repo and materialize to online store")
+    p.add_argument("--zone", choices=["current", "experiment"], default="current")
+    p.add_argument("--exp-id", default="", help="Experiment ID when zone=experiment")
+    return p.parse_args()
 
 
 def _ensure_partition_columns(project_root: Path) -> None:
@@ -48,6 +56,15 @@ def _ensure_partition_columns(project_root: Path) -> None:
 
 
 def main() -> None:
+    args = parse_args()
+
+    # Force environment for this run (affects FeatureStore in-process)
+    os.environ["FEAST_DATA_ZONE"] = args.zone
+    if args.zone == "experiment":
+        os.environ["FEAST_EXPERIMENT_ID"] = args.exp_id or os.environ.get("FEAST_EXPERIMENT_ID", "")
+    else:
+        os.environ["FEAST_EXPERIMENT_ID"] = ""
+
     logger.info("Running feast apply via CLI...")
     repo_dir = Path(__file__).resolve().parents[1] / "feature_repo"
 
@@ -57,8 +74,7 @@ def main() -> None:
         reg.unlink()
 
     env = os.environ.copy()
-    env.setdefault("FEAST_DISABLE_ODFV", "1")
-    env.setdefault("FEAST_DATA_ZONE", "current")
+    env["FEAST_DISABLE_ODFV"] = "1"
 
     subprocess.run(["feast", "-c", str(repo_dir), "apply"], check=True, env=env)
 
