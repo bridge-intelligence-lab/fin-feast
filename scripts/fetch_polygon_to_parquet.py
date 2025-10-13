@@ -28,6 +28,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--symbols", nargs="+", required=True)
     p.add_argument("--adjusted", default="true")
     p.add_argument("--push-latest", action="store_true")
+    p.add_argument("--symbols-delay-secs", type=float, default=1.0, help="Sleep seconds between symbol requests to avoid 429s on free tier")
     return p.parse_args()
 
 
@@ -129,7 +130,7 @@ def main() -> None:
     # Map Feast symbols to Polygon tickers where needed
     from fin_feast.utils.symbols import to_polygon_ticker
 
-    for sym in args.symbols:
+    for i, sym in enumerate(args.symbols):
         ticker = to_polygon_ticker(sym)
         ts_df = fetch_aggregates(
             client,
@@ -140,11 +141,16 @@ def main() -> None:
         )
         if ts_df.empty:
             logger.warning("No data for %s", sym)
-            continue
-        ts_df.insert(0, "symbol", sym)
-        ts_df["event_timestamp"] = pd.to_datetime(ts_df["event_timestamp"], utc=True)
-        ts_df = add_indicators(ts_df)
-        write_parquet_partitioned(base, ts_df)
+        else:
+            ts_df.insert(0, "symbol", sym)
+            ts_df["event_timestamp"] = pd.to_datetime(ts_df["event_timestamp"], utc=True)
+            ts_df = add_indicators(ts_df)
+            write_parquet_partitioned(base, ts_df)
+        # Throttle between symbols to avoid free-tier 429s
+        if i < len(args.symbols) - 1:
+            import time as _time
+
+            _time.sleep(float(args.symbols_delay_secs))
 
     logger.info("Polygon data fetched for %s in %s", args.symbols, base)
 
