@@ -65,8 +65,12 @@ def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     # Apply all repo objects explicitly to support current Feast version
     import importlib.util
     import sys
-    sys.path.insert(0, str(project_root))
-    from feature_repo import repo  # type: ignore
+    repo_dir = project_root / "feature_repo"
+    sys.path.insert(0, str(repo_dir))
+    spec = importlib.util.spec_from_file_location("repo", repo_dir / "repo.py")
+    assert spec and spec.loader
+    repo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(repo)  # type: ignore[attr-defined]
     objects = [
         repo.symbol,
         repo.make_daily_ohlcv_source(),

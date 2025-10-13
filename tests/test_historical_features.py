@@ -63,9 +63,14 @@ def test_historical_features(tmp_path: Path, monkeypatch) -> None:
     fs = FeatureStore(repo_path=str(project_root / "feature_repo"))
 
     # Ensure registry contains feature views for this run
+    import importlib.util
     import sys
-    sys.path.insert(0, str(project_root))
-    from feature_repo import repo  # type: ignore
+    repo_dir = project_root / "feature_repo"
+    sys.path.insert(0, str(repo_dir))
+    spec = importlib.util.spec_from_file_location("repo", repo_dir / "repo.py")
+    assert spec and spec.loader
+    repo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(repo)  # type: ignore[attr-defined]
     fs.apply([
         repo.symbol,
         repo.make_daily_ohlcv_source(),
