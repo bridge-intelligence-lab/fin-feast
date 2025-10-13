@@ -9,12 +9,16 @@ This document helps you reset, run, and troubleshoot the Feast Polygon POC quick
 
 Create and activate venv (example for Ubuntu):
 ```bash
-python3.11 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 python -V  # 3.11.x
 python -m pip install -U pip
-python -m pip install -e .[dev]
+python -m pip install -e ".[dev]"
 ```
+Note for zsh: If you see 'no matches found' on extras, quote or escape the brackets:
+- python -m pip install -e ".[dev]"
+- python -m pip install -e .\[dev\]
+
 
 Start Redis:
 ```bash

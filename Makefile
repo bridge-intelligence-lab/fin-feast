@@ -6,7 +6,7 @@ PIP=pip
 setup:
 	$(PIP) install -U pip
 	$(PIP) install -U ruff
-	$(PIP) install -U -e .[dev]
+	$(PIP) install -U -e ".[dev]"
 
 up:
 	docker-compose up -d
@@ -17,7 +17,10 @@ down:
 	docker-compose down
 
 apply:
-	cd feature_repo && feast apply
+	cd feature_repo && rm -f registry.db && FEAST_DISABLE_ODFV=1 feast apply
+
+test:
+	pytest -q
 
 materialize:
 	$(PY) scripts/materialize_incremental.py
@@ -39,6 +42,9 @@ train-ds:
 
 query:
 	$(PY) scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
+
+query-odfv:
+	FEAST_ENABLE_ODFV=1 $(PY) scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
 
 prune:
 	$(PY) scripts/prune_retention.py --dry-run

@@ -4,4 +4,9 @@ provider: local
 online_store:
   type: redis
   connection_string: localhost:6379
-entity_key_serialization_version: 2
+offline_store:
+  type: file
+entity_key_serialization_version: 3
+
+# Exclude ODFV to avoid dill issues in this Feast version
+on_demand_feature_views: []

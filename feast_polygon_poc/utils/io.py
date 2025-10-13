@@ -47,9 +47,10 @@ def partition_path(base: Path, symbol: str, ts: datetime) -> Path:
 
 
 def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
-    """Write hive-partitioned Parquet and drop `symbol` column from files.
+    """Write hive-partitioned Parquet and retain `symbol` column in files.
 
-    This avoids Arrow type merge conflicts by relying on the partition key for `symbol`.
+    Some downstream consumers (tests, historical joins) expect `symbol` to be present
+    in the file schema in addition to the partition path.
     """
     ensure_columns(df)
     df = normalize_schema(df)
@@ -57,18 +58,18 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
         part_dir = partition_path(base, symbol, pd.Timestamp(date, tz="UTC").to_pydatetime())
         part_dir.mkdir(parents=True, exist_ok=True)
         file_path = part_dir / "data.parquet"
-        g_no_sym = g.drop(columns=["symbol"]).sort_values("event_timestamp")
+        g_sorted = g.sort_values("event_timestamp")
         if file_path.exists():
             existing = pd.read_parquet(file_path)
             combined = (
-                pd.concat([existing, g_no_sym], ignore_index=True)
+                pd.concat([existing, g_sorted], ignore_index=True)
                 .drop_duplicates(subset=["event_timestamp"], keep="last")
                 .sort_values("event_timestamp")
             )
             combined.to_parquet(file_path, index=False)
         else:
-            g_no_sym.to_parquet(file_path, index=False)
-        logger.info("Wrote %d rows to %s", len(g_no_sym), file_path)
+            g_sorted.to_parquet(file_path, index=False)
+        logger.info("Wrote %d rows to %s", len(g_sorted), file_path)
 
 
 def read_recent_bars(base: Path, symbol: str, n: int) -> pd.DataFrame:
