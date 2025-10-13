@@ -6,7 +6,7 @@
 - Symptom: `feast apply` fails while inspecting FileSource schema
 - Cause: Parquet files include a `symbol` column (sometimes encoded as dictionary), while hive partitioning also provides `symbol`. PyArrow cannot merge these types.
 - Fix (implemented): Drop `symbol` from Parquet files; rely on partition key.
-  - Implemented in `feast_polygon_poc/utils/io.py::write_parquet_partitioned`.
+  - Implemented in `fin_feast/utils/io.py::write_parquet_partitioned`.
   - For existing data, delete `data/offline` and regenerate.
 
 ### 2) Registry issues (lock, corruption, drift)

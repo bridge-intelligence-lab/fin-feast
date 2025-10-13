@@ -6,7 +6,7 @@ from typing import Iterable
 
 import pandas as pd
 
-from feast_polygon_poc.logging import get_logger
+from fin_feast.logging import get_logger
 
 logger = get_logger(__name__)
 

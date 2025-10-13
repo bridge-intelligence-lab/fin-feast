@@ -4,8 +4,8 @@ import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from feast_polygon_poc.logging import get_logger
-from feast_polygon_poc.utils.env import get_paths, get_retention_days
+from fin_feast.logging import get_logger
+from fin_feast.utils.env import get_paths, get_retention_days
 
 logger = get_logger(__name__)
 

@@ -8,11 +8,11 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from feast_polygon_poc.features.rolling import add_indicators
-from feast_polygon_poc.logging import get_logger
-from feast_polygon_poc.utils.env import resolve_base_path
-from feast_polygon_poc.utils.env import Zone
-from feast_polygon_poc.utils.io import write_parquet_partitioned
+from fin_feast.features.rolling import add_indicators
+from fin_feast.logging import get_logger
+from fin_feast.utils.env import resolve_base_path
+from fin_feast.utils.env import Zone
+from fin_feast.utils.io import write_parquet_partitioned
 
 logger = get_logger(__name__)
 

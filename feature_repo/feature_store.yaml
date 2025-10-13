@@ -1,4 +1,4 @@
-project: feast_polygon_poc
+project: fin_feast
 registry: registry.db
 provider: local
 online_store:

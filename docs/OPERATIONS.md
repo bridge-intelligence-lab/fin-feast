@@ -10,7 +10,7 @@ This document describes how to operate the batch and streaming pipelines, schedu
 - Goal: keep online store fresh with new Parquet rows
 - Example (cron, every minute):
 ```
-* * * * * cd /path/to/feast-polygon-poc && . .venv/bin/activate && python scripts/materialize_incremental.py >> logs/materialize.log 2>&1
+* * * * * cd /path/to/fin-feast-poc && . .venv/bin/activate && python scripts/materialize_incremental.py >> logs/materialize.log 2>&1
 ```
 - Alternatively, a systemd timer or a simple loop can be used.
 
@@ -69,7 +69,7 @@ python scripts/fetch_polygon_to_parquet.py --zone current --start YYYY-MM-DD --e
   - Use `build_training_dataset.py` to materialize historical features
 
 ## Observability
-- Logs: INFO by default (feast_polygon_poc/logging.py)
+- Logs: INFO by default (fin_feast/logging.py)
 - Consider redirecting materialize and streaming logs to files (see cron example), and rotating logs in production
 
 ## HA considerations (beyond POC)

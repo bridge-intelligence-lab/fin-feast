@@ -5,7 +5,7 @@ This document helps you reset, run, and troubleshoot the Feast Polygon POC quick
 ## 1) Environment
 - Python: 3.11 (venv recommended)
 - Docker: docker-compose
-- Project root: `/home/rodrigo/repo/fin_feast_poc/feast-polygon-poc`
+- Project root: `/home/rodrigo/repo/fin_feast_poc/`
 
 Create and activate venv (example for Ubuntu):
 ```bash
@@ -42,7 +42,7 @@ We use Hive-style partitioning (`symbol=X:BTCUSD/date=YYYY-MM-DD`). If Parquet f
 ### Solution A (recommended): rely only on partition key for symbol
 Drop `symbol` from the file content before writing. Feast still reads `symbol` from the partition directory name, so joins will work.
 
-Patch guidance (feast_polygon_poc/utils/io.py):
+Patch guidance (fin_feast/utils/io.py):
 ```python
 def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
     ensure_columns(df)
@@ -146,14 +146,14 @@ PIP = $(PY) -m pip
 
 ## 11) Directory layout (key parts)
 ```
-feast-polygon-poc/
+fin-feast-poc/
   feature_repo/
     feature_store.yaml
     entities.py
     data_sources.py
     feature_views.py
     repo.py
-  feast_polygon_poc/
+  fin_feast/
     utils/
       io.py
       env.py

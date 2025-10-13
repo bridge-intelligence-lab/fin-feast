@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from feast_polygon_poc.features.rolling import add_indicators
-from feast_polygon_poc.utils.io import write_parquet_partitioned
+from fin_feast.features.rolling import add_indicators
+from fin_feast.utils.io import write_parquet_partitioned
 
 
 def test_stream_simulated_partition_write(tmp_path: Path) -> None:

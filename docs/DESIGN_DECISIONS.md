@@ -1,6 +1,6 @@
 # Design Decisions (ADR-style)
 
-This file captures key decisions and rationale for the Feast Polygon POC.
+This file captures key decisions and rationale for the Fin Feast POC.
 
 ## ADR-001: Offline precompute of rolling indicators
 - Context: Indicators like MA, RSI, ATR require window state.

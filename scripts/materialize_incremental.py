@@ -7,7 +7,7 @@ from pathlib import Path
 
 from feast import FeatureStore
 
-from feast_polygon_poc.logging import get_logger
+from fin_feast.logging import get_logger
 
 logger = get_logger(__name__)
 

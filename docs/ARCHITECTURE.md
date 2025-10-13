@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the system architecture for the Feast Polygon POC, including batch (offline-first) and streaming minute-bar ingestion paths, data zones, and how features flow to the online store for inference.
+This document describes the system architecture for the Fin Feast POC, including batch (offline-first) and streaming minute-bar ingestion paths, data zones, and how features flow to the online store for inference.
 
 ## Overview
 - Offline store: Parquet files partitioned by symbol and date

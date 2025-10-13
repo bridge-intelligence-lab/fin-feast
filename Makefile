@@ -4,6 +4,8 @@ PIP=pip
 .PHONY: setup up down apply materialize synth-daily synth-minute poly-daily poly-minute train-ds query prune test lint format
 
 setup:
+	$(PY) -m venv .venv
+	. .venv/bin/activate && \
 	$(PIP) install -U pip
 	$(PIP) install -U ruff
 	$(PIP) install -U -e ".[dev]"
