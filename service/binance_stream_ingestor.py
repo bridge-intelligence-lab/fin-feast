@@ -24,20 +24,13 @@ INTERVAL = "1m"
 
 
 @dataclass
-class SymbolMap:
-    feast_symbol: str
-    binance_symbol: str  # lowercase, e.g., btcusdt
+from fin_feast.utils.symbols import SymbolMap, to_binance_symbol
 
 
 def map_symbols(symbols: List[str]) -> List[SymbolMap]:
     out: List[SymbolMap] = []
     for s in symbols:
-        if s == "X:BTCUSD":
-            out.append(SymbolMap(s, "btcusdt"))
-        elif s == "C:ETHUSD":
-            out.append(SymbolMap(s, "ethusdt"))
-        else:
-            raise ValueError(f"Unsupported symbol for Binance mapping: {s}")
+        out.append(SymbolMap(s, to_binance_symbol(s)))
     return out
 
 

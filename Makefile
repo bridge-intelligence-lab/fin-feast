@@ -1,7 +1,26 @@
 PY=python
 PIP=pip
 
-.PHONY: setup up down apply materialize synth-daily synth-minute poly-daily poly-minute train-ds query prune test lint format
+help:
+	@echo "Available targets:"
+	@echo "  setup           - install dev deps into current interpreter/venv"
+	@echo "  up / down       - docker-compose up/down Redis"
+	@echo "  apply           - feast apply with ODFV disabled"
+	@echo "  materialize     - run materialize_incremental.py (apply + materialize)"
+	@echo "  synth-daily     - generate synthetic daily data into current zone"
+	@echo "  synth-minute    - generate synthetic minute data into current zone"
+	@echo "  poly-daily      - fetch Polygon daily aggregates into current zone"
+	@echo "  poly-minute     - fetch Polygon minute aggregates into current zone"
+	@echo "  binance-stream  - run Binance streaming ingestor (no API key)"
+	@echo "  validate-stream - validate WS, parquet growth, and online features"
+	@echo "  train-ds        - build historical training dataset"
+	@echo "  query           - run online query demo"
+	@echo "  prune           - dry-run retention pruning"
+	@echo "  test            - run pytest"
+	@echo "  lint / format   - ruff check / format"
+	@echo "  clean           - remove offline data (current/experiments) and registry"
+
+.PHONY: help setup up down apply materialize synth-daily synth-minute poly-daily poly-minute train-ds query prune test lint format clean
 
 setup:
 # 	$(PY) -m venv .venv
@@ -64,4 +83,8 @@ lint:
 	ruff check .
 
 format:
-	ruff format .
+		ruff format .
+
+clean:
+		rm -rf data/offline/current/daily/* data/offline/current/minute/* data/offline/experiments/*
+		rm -f feature_repo/registry.db
