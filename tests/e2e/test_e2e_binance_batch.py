@@ -30,8 +30,8 @@ def test_e2e_binance_batch():
 
     # Apply + materialize
     print("[E2E] == Binance batch: apply ==")
-    cp = run_shell("make apply")
-    assert_ok(cp, "make apply")
+    cp = run_shell("make apply-current")
+    assert_ok(cp, "make apply-current")
     print("[E2E] == Binance batch: materialize ==")
     cp = run_shell("make materialize")
     assert_ok(cp, "make materialize")
@@ -40,7 +40,7 @@ def test_e2e_binance_batch():
     print("[E2E] == Binance batch: online query demo ==")
     cp = run_shell("python scripts/online_query_demo.py --symbols X:BTCUSD C:ETHUSD")
     assert_ok(cp, "online_query_demo")
-    out = cp.stdout
+    out = cp.stdout + cp.stderr
     assert "Symbol=X:BTCUSD" in out and "Symbol=C:ETHUSD" in out
 
     # Offline: tiny historical features query

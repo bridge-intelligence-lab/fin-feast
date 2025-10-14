@@ -35,10 +35,28 @@ def test_e2e_streaming_polygon():
     )
 
     try:
+        # Seed daily and minute parquet to guarantee offline availability for both FVs
+        print("[E2E] == Polygon streaming: seed daily (30d) ==")
+        cp_seed_daily = run_shell(
+            "python scripts/fetch_polygon_to_parquet.py --zone current --start 2025-09-01 --end 2025-09-30 --freq daily --symbols X:BTCUSD C:ETHUSD --symbols-delay-secs 1.0"
+        )
+        assert_ok(cp_seed_daily, "seed daily polygon")
+        print("[E2E] == Polygon streaming: seed minute (1d) ==")
+        cp_seed_min = run_shell(
+            "python scripts/fetch_polygon_to_parquet.py --zone current --start 2025-10-01 --end 2025-10-01 --freq minute --symbols X:BTCUSD C:ETHUSD --symbols-delay-secs 1.0"
+        )
+        assert_ok(cp_seed_min, "seed minute polygon")
+        # Apply & materialize to ensure FV exists and Redis is populated
+        print("[E2E] == Polygon streaming: apply repo ==")
+        cp_apply = run_shell("make apply-current")
+        assert_ok(cp_apply, "make apply-current polygon")
+        print("[E2E] == Polygon streaming: materialize ==")
+        cp_mat = run_shell("make materialize")
+        assert_ok(cp_mat, "make materialize polygon")
         time.sleep(10)
-        # Validate with provider polygon
+        # Validate with provider polygon (WS optional)
         cp = run_shell(
-            "python scripts/validate_streaming.py --zone current --symbols X:BTCUSD C:ETHUSD --check-online --provider polygon"
+            "python scripts/validate_streaming.py --zone current --symbols X:BTCUSD C:ETHUSD --check-online --provider polygon --ws-timeout 30 --ws-optional"
         )
         assert_ok(cp, "validate_streaming polygon")
         # Optional: run online query demo

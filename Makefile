@@ -101,3 +101,24 @@ format:
 clean:
 		rm -rf data/offline/current/daily/* data/offline/current/minute/* data/offline/experiments/*
 		rm -f feature_repo/registry.db
+
+# E2E shortcuts
+.PHONY: e2e e2e-all e2e-experiment
+
+e2e:
+	E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_quickstart.py -s
+	E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_binance_batch.py -s -k binance_batch
+	E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_streaming_binance.py -s -k streaming_binance
+
+e2e-all: e2e
+	@if [ -n "$$POLYGON_API_KEY" ]; then \
+		echo "Running Polygon E2E..."; \
+		E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_polygon_batch.py -s -k polygon_batch; \
+		E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_streaming_polygon.py -s -k streaming_polygon; \
+	else \
+		echo "POLYGON_API_KEY not set; skipping Polygon E2E."; \
+	fi
+
+e2e-experiment:
+	E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_experiment_training.py -s
+

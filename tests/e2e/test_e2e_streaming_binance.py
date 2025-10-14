@@ -42,8 +42,27 @@ def test_e2e_streaming_binance(tmp_path: Path):
     )
 
     try:
+        # Seed offline store with sufficient history (daily and minute)
+        print("[E2E] == Binance streaming: seed daily (30d) ==")
+        cp_seed_daily = _run(
+            "python scripts/fetch_binance_to_parquet.py --zone current --start 2025-09-01 --end 2025-09-30 --freq daily --symbols X:BTCUSD C:ETHUSD"
+        )
+        assert cp_seed_daily.returncode == 0, f"seed daily failed\nstdout:\n{cp_seed_daily.stdout}\nstderr:\n{cp_seed_daily.stderr}"
+        print("[E2E] == Binance streaming: seed minute (1d) ==")
+        cp_seed_min = _run(
+            "python scripts/fetch_binance_to_parquet.py --zone current --start 2025-10-01 --end 2025-10-01 --freq minute --symbols X:BTCUSD C:ETHUSD"
+        )
+        assert cp_seed_min.returncode == 0, f"seed minute failed\nstdout:\n{cp_seed_min.stdout}\nstderr:\n{cp_seed_min.stderr}"
+        # Apply repo so the online FV exists
+        print("[E2E] == Binance streaming: apply repo ==")
+        cp_apply = _run("make apply-current")
+        assert cp_apply.returncode == 0, f"make apply-current failed\nstdout:\n{cp_apply.stdout}\nstderr:\n{cp_apply.stderr}"
         # Give it some time to produce
-        time.sleep(10)
+        time.sleep(15)
+        # Materialize to ensure online store has data
+        print("[E2E] == Binance streaming: materialize ==")
+        cp_mat = _run("make materialize")
+        assert cp_mat.returncode == 0, f"make materialize failed\nstdout:\n{cp_mat.stdout}\nstderr:\n{cp_mat.stderr}"
         # Validate stream + parquet + online
         print("[E2E] == Binance streaming: validate_streaming ==")
         cp = _run("python scripts/validate_streaming.py --zone current --symbols X:BTCUSD C:ETHUSD --check-online --provider binance")

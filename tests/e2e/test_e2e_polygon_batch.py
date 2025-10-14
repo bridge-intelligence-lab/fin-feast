@@ -34,8 +34,8 @@ def test_e2e_polygon_batch():
 
     # Apply + materialize
     print("[E2E] == Polygon batch: apply ==")
-    cp = run_shell("make apply")
-    assert_ok(cp, "make apply")
+    cp = run_shell("make apply-current")
+    assert_ok(cp, "make apply-current")
     print("[E2E] == Polygon batch: materialize ==")
     cp = run_shell("make materialize")
     assert_ok(cp, "make materialize")
@@ -44,7 +44,7 @@ def test_e2e_polygon_batch():
     print("[E2E] == Polygon batch: online query demo ==")
     cp = run_shell("python scripts/online_query_demo.py --symbols X:BTCUSD C:ETHUSD")
     assert_ok(cp, "online_query_demo")
-    out = cp.stdout
+    out = cp.stdout + cp.stderr
     assert "Symbol=X:BTCUSD" in out and "Symbol=C:ETHUSD" in out
 
     # Offline historical check

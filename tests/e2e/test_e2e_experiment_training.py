@@ -31,17 +31,28 @@ def test_e2e_experiment_training(tmp_path: Path):
     # Set experiment env
     exp_id = f"my_exp_{os.getpid()}"
 
-    # Generate synthetic under experiments
+    # Generate synthetic under experiments (daily and minute)
     cp = _run(
-        "python scripts/generate_synthetic_data.py --zone experiment --exp-id '' --start 2025-10-01 --end 2025-10-03 --freq daily --symbols X:BTCUSD C:ETHUSD",
+        "python scripts/generate_synthetic_data.py --zone experiment --exp-id \"$FEAST_EXPERIMENT_ID\" --start 2025-10-01 --end 2025-10-03 --freq daily --symbols X:BTCUSD C:ETHUSD",
+        env={"FEAST_EXPERIMENT_ID": exp_id, "FEAST_DATA_ZONE": "experiment"},
+    )
+    assert cp.returncode == 0, cp.stderr
+    cp = _run(
+        "python scripts/generate_synthetic_data.py --zone experiment --exp-id \"$FEAST_EXPERIMENT_ID\" --start 2025-10-01T00:00:00Z --end 2025-10-01T23:59:00Z --freq minute --symbols X:BTCUSD C:ETHUSD",
         env={"FEAST_EXPERIMENT_ID": exp_id, "FEAST_DATA_ZONE": "experiment"},
     )
     assert cp.returncode == 0, cp.stderr
 
     # Apply experiment + materialize
-    cp = _run("make apply-experiment", env={"FEAST_EXPERIMENT_ID": exp_id})
+    cp = _run(
+        'bash -lc "cd feature_repo && FEAST_DATA_ZONE=experiment FEAST_EXPERIMENT_ID=\"$FEAST_EXPERIMENT_ID\" FEAST_DISABLE_ODFV=1 feast apply"',
+        env={"FEAST_EXPERIMENT_ID": exp_id, "FEAST_DATA_ZONE": "experiment"},
+    )
     assert cp.returncode == 0, cp.stderr
-    cp = _run("make materialize", env={"FEAST_EXPERIMENT_ID": exp_id, "FEAST_DATA_ZONE": "experiment"})
+    cp = _run(
+        'FEAST_DATA_ZONE=experiment FEAST_EXPERIMENT_ID="$FEAST_EXPERIMENT_ID" make materialize',
+        env={"FEAST_EXPERIMENT_ID": exp_id, "FEAST_DATA_ZONE": "experiment"},
+    )
     assert cp.returncode == 0, cp.stderr
 
     # Build training dataset
@@ -49,7 +60,7 @@ def test_e2e_experiment_training(tmp_path: Path):
     if outp.exists():
         outp.unlink()
     cp = _run(
-        "python scripts/build_training_dataset.py --zone experiment --exp-id '' --start 2025-09-01 --end 2025-10-12 --symbols X:BTCUSD C:ETHUSD --out data/derived/training.parquet",
+        "python scripts/build_training_dataset.py --zone experiment --exp-id \"$FEAST_EXPERIMENT_ID\" --start 2025-10-01 --end 2025-10-03 --symbols X:BTCUSD C:ETHUSD --out data/derived/training.parquet",
         env={"FEAST_EXPERIMENT_ID": exp_id, "FEAST_DATA_ZONE": "experiment"},
     )
     assert cp.returncode == 0, cp.stderr

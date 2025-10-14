@@ -8,10 +8,6 @@ import pandas as pd
 
 from feast import FeatureStore
 
-from fin_feast.logging import get_logger
-
-logger = get_logger(__name__)
-
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
@@ -35,7 +31,7 @@ def main() -> None:
 
     # For simplicity, use minute feature view for fine granularity; could be parameterized
     # We will sample at 1-minute frequency in the range
-    idx = pd.date_range(start, end, freq="T", inclusive="both", tz="UTC")
+    idx = pd.date_range(start, end, freq="min", inclusive="both", tz="UTC")
     rows = []
     for sym in args.symbols:
         for ts in idx:
@@ -69,8 +65,15 @@ def main() -> None:
         "minute_ohlcv_fv:atr_14",
     ]
 
-    logger.info("Fetching historical features for %d rows", len(entity_df))
-    hf = fs.get_historical_features(entity_df=entity_df, features=features).to_df()
+    print(f"[TRAIN] Entity DF rows={len(entity_df)}, features={len(features)}")
+    print(f"[TRAIN] Time window: {start} to {end}")
+    try:
+        hf = fs.get_historical_features(
+            entity_df=entity_df, features=features, full_feature_names=True
+        ).to_df()
+    except Exception as e:
+        print(f"[TRAIN][ERROR] Historical features build failed: {e}")
+        raise
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -78,7 +81,7 @@ def main() -> None:
         hf.to_csv(out_path, index=False)
     else:
         hf.to_parquet(out_path, index=False)
-    logger.info("Wrote training dataset: %s (%d rows)", out_path, len(hf))
+    print(f"[TRAIN] Wrote training dataset: {out_path} ({len(hf)} rows)")
 
 
 if __name__ == "__main__":
