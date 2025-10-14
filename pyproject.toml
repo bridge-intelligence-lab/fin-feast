@@ -26,10 +26,16 @@ dependencies = [
 dev = [
   "pytest>=8.1.0",
   "ruff>=0.6.5",
+  "mypy>=1.10.0",
 ]
 
 [tool.setuptools.packages.find]
 include = ["fin_feast*"]
+
+[project.scripts]
+finfeast-materialize = "scripts.materialize_incremental:main"
+finfeast-generate = "scripts.generate_synthetic_data:main"
+finfeast-validate = "scripts.validate_streaming:main"
 
 [tool.ruff]
 line-length = 100

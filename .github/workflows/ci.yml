@@ -25,6 +25,9 @@ jobs:
       - name: Lint
         run: |
           ruff check .
+      - name: Type check (mypy)
+        run: |
+          mypy
       - name: Run unit tests
         env:
           FEAST_DATA_ZONE: current
