@@ -49,6 +49,32 @@ jobs:
           pytest -q tests/e2e/test_e2e_polygon_batch.py -s -k polygon_batch
           pytest -q tests/e2e/test_e2e_streaming_polygon.py -s -k streaming_polygon
 
+  integration:
+    if: ${{ vars.ENABLE_INTEGRATION == '1' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          pip install -e .[dev]
+      - name: Start Redis via docker-compose
+        run: |
+          docker-compose up -d
+      - name: Run integration tests
+        env:
+          FEAST_DATA_ZONE: current
+        run: |
+          pytest -q -m "integration"
+      - name: Stop Redis
+        if: always()
+        run: |
+          docker-compose down -v || true
+
   secrets-scan:
     if: ${{ vars.ENABLE_LEAK_SCAN == '1' }}
     runs-on: ubuntu-latest

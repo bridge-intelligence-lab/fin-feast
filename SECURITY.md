@@ -1,6 +1,6 @@
 # Security Policy
 
-- Please report security issues privately to the maintainer: Rodrigo Oliveira <security@example.com>
+- Please report security issues privately to the maintainer: Rodrigo Oliveira <rodrfons@hotmail.com>
 - Do not open public issues for potential vulnerabilities.
 - Rotate any credentials you suspect may have been exposed.
 

@@ -4,6 +4,8 @@ Offline-first Feast pipeline with Redis online store, using Polygon for data. Su
 
 [![CI](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml)
 
+Note: Update the CI badge URL to your actual org/repo after publishing.
+
 ## Table of Contents
 - Architecture: docs/ARCHITECTURE.md
 - Usage: docs/USAGE.md
