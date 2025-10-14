@@ -5,7 +5,6 @@ import asyncio
 import os
 from collections import deque
 from pathlib import Path
-from typing import Deque, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -24,10 +23,10 @@ AGG_CHANNEL = "AM"  # Minute aggregates
 
 class RollingState:
     def __init__(self, max_bars: int = 200):
-        self.buffers: Dict[str, Deque[dict]] = {}
+        self.buffers: dict[str, deque[dict]] = {}
         self.max_bars = max_bars
 
-    def warm_start(self, base: Path, symbols: List[str]) -> None:
+    def warm_start(self, base: Path, symbols: list[str]) -> None:
         for sym in symbols:
             df = read_recent_bars(base, sym, self.max_bars)
             self.buffers[sym] = deque(df.to_dict("records"), maxlen=self.max_bars)
@@ -37,8 +36,7 @@ class RollingState:
         if sym not in self.buffers:
             self.buffers[sym] = deque(maxlen=self.max_bars)
         self.buffers[sym].append(bar)
-        df = pd.DataFrame(list(self.buffers[sym]))
-        return df
+        return pd.DataFrame(list(self.buffers[sym]))
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,7 +68,45 @@ async def main_async() -> None:
         subscriptions=[f"{AGG_CHANNEL}.{s}" for s in args.symbols], api_key=api_key
     )
 
-    async def handle_msg(msgs: List[dict]) -> None:  # type: ignore[type-arg]
+    def safe_push_online(fs_local: FeatureStore, latest_df: pd.DataFrame) -> None:
+        symbol_str = "?"
+        try:
+            row = latest_df.iloc[0].to_dict()
+            symbol_str = str(row.get("symbol", "?"))
+            # Normalize NaNs and drop event_timestamp
+            clean = {
+                k: (None if (isinstance(v, float) and (np.isnan(v))) else v) for k, v in row.items()
+            }
+            clean.pop("event_timestamp", None)
+            # Build payload restricted to FV features + entity
+            fv_features = [
+                "open",
+                "high",
+                "low",
+                "close",
+                "vwap",
+                "volume",
+                "return_1",
+                "ma_5",
+                "ma_20",
+                "vol_20",
+                "rsi_14",
+                "atr_14",
+            ]
+            assert "symbol" in clean, "symbol is required for online write"
+            payload = {
+                "symbol": clean["symbol"],
+                **{k: clean.get(k) for k in fv_features if k in clean},
+            }
+            df_payload = pd.DataFrame([payload])
+            fs_local.write_to_online_store(
+                feature_view_name="minute_ohlcv_fv",
+                df=df_payload,
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.error("Online write failed for %s: %s", symbol_str, e)
+
+    async def handle_msg(msgs: list[dict]) -> None:  # type: ignore[type-arg]
         for m in msgs:
             if m.get("ev") != AGG_CHANNEL:
                 continue
@@ -88,7 +124,7 @@ async def main_async() -> None:
                 "high": float(m.get("h") or m.get("high")),
                 "low": float(m.get("l") or m.get("low")),
                 "close": float(m.get("c") or m.get("close")),
-                "vwap": float((m.get("vw") or m.get("vwap") or m.get("c") or m.get("close"))),
+                "vwap": float(m.get("vw") or m.get("vwap") or m.get("c") or m.get("close")),
                 "volume": float(m.get("v") or m.get("volume", 0.0)),
             }
             df = state.add_bar(bar)
@@ -99,22 +135,7 @@ async def main_async() -> None:
             logger.info("Wrote latest bar to Parquet for %s at %s", sym, ts)
             # Optionally push to online store for immediate inference
             if fs is not None:
-                row = latest.iloc[0].to_dict()
-                # Normalize NaNs and drop event_timestamp
-                clean = {k: (None if (isinstance(v, float) and (np.isnan(v))) else v) for k, v in row.items()}
-                clean.pop("event_timestamp", None)
-                # Build payload restricted to FV features + entity
-                fv_features = [
-                    "open", "high", "low", "close", "vwap", "volume",
-                    "return_1", "ma_5", "ma_20", "vol_20", "rsi_14", "atr_14",
-                ]
-                assert "symbol" in clean, "symbol is required for online write"
-                payload = {"symbol": clean["symbol"], **{k: clean.get(k) for k in fv_features if k in clean}}
-                df_payload = pd.DataFrame([payload])
-                fs.write_to_online_store(
-                    feature_view_name="minute_ohlcv_fv",
-                    df=df_payload,
-                )
+                safe_push_online(fs, latest)
                 logger.info("Pushed latest bar to Redis for %s", sym)
 
     await ws.connect(handle_msg)

@@ -3,19 +3,16 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-from dataclasses import dataclass
-from typing import Dict, List
 
-import numpy as np
 import pandas as pd
 import websockets
+from feast import FeatureStore
 
 from fin_feast.features.rolling import add_indicators
 from fin_feast.logging import get_logger
 from fin_feast.utils.env import resolve_base_path
-from fin_feast.utils.io import write_parquet_partitioned, read_recent_bars
-from feast import FeatureStore
-from fin_feast.online.push import push_rows_to_online
+from fin_feast.utils.io import read_recent_bars, write_parquet_partitioned
+from fin_feast.utils.symbols import SymbolMap, to_binance_symbol
 
 logger = get_logger(__name__)
 
@@ -23,11 +20,8 @@ BINANCE_WS = "wss://stream.binance.com:9443/stream?streams={streams}"
 INTERVAL = "1m"
 
 
-from fin_feast.utils.symbols import SymbolMap, to_binance_symbol
-
-
-def map_symbols(symbols: List[str]) -> List[SymbolMap]:
-    out: List[SymbolMap] = []
+def map_symbols(symbols: list[str]) -> list[SymbolMap]:
+    out: list[SymbolMap] = []
     for s in symbols:
         out.append(SymbolMap(s, to_binance_symbol(s)))
     return out
@@ -45,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-async def stream_binance():
+async def stream_binance():  # noqa: PLR0912, PLR0915
     args = parse_args()
     sym_maps = map_symbols(args.symbols)
 
@@ -53,7 +47,7 @@ async def stream_binance():
     base.mkdir(parents=True, exist_ok=True)
 
     # Warm state by reading recent bars if present (for robust indicators)
-    recent: Dict[str, pd.DataFrame] = {}
+    recent: dict[str, pd.DataFrame] = {}
     for sm in sym_maps:
         try:
             df_prev = read_recent_bars(base, sm.feast_symbol, 200)
@@ -73,8 +67,10 @@ async def stream_binance():
     url = BINANCE_WS.format(streams=streams)
     logger.info("Connecting Binance combined WS: %s", url)
 
+    attempt = 0
     async for ws in websockets.connect(url, ping_interval=20, ping_timeout=20):  # type: ignore
         try:
+            attempt = 0  # reset on successful connect
             async for raw in ws:
                 try:
                     msg = json.loads(raw)
@@ -164,8 +160,15 @@ async def stream_binance():
                         # Log but do not break streaming loop
                         logger.error("Online write failed for %s: %s", feast_symbol, e)
         except Exception as e:
-            logger.warning("WS error/reconnect: %s", e)
-            await asyncio.sleep(2)
+            # Exponential backoff with jitter
+            attempt += 1
+            import random
+
+            delay = min(30, (2 ** min(attempt, 8)))  # cap growth
+            jitter = random.uniform(-0.2, 0.2) * delay
+            wait = max(1, delay + jitter)
+            logger.warning("WS error/reconnect (attempt=%d wait=%.2fs): %s", attempt, wait, e)
+            await asyncio.sleep(wait)
             continue
 
 
