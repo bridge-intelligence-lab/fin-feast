@@ -14,11 +14,11 @@ This file captures key decisions and rationale for the Fin Feast POC.
 - Rationale: Retains offline-first guarantees and resilience; meets freshness targets when streaming.
 - Consequence: Slight increase in operational complexity; requires schema alignment with FeatureView.
 
-## ADR-003: Parquet partitioning and Solution A (drop `symbol` from files)
-- Context: PyArrow schema merge conflict (symbol string vs dictionary) when files include `symbol` and partitions also provide it.
-- Decision: Drop `symbol` from Parquet files and rely on hive partition key `symbol=...`.
-- Rationale: Robust schema merging; deterministic idempotent upserts by event_timestamp.
-- Consequence: When reading back for warm-starts, code injects `symbol` from partition path.
+## ADR-003: Parquet partitioning and schema in-file partition keys
+- Context: Schema merging across partitions was brittle when partition keys were inconsistently present/absent inside files.
+- Decision: Retain both partition columns (`symbol`, `date`) in Parquet files and in the partition path.
+- Rationale: Avoids merge conflicts and meets tools’ expectations (if any partition key is present, include all); keeps upserts idempotent by event_timestamp.
+- Consequence: Readers can rely on consistent schemas; warm-start logic can inject or ignore `symbol` as needed.
 
 ## ADR-004: On-Demand Feature View scope
 - Context: ODFV is experimental and not ideal for heavy offline usage.

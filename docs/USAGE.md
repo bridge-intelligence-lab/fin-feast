@@ -131,6 +131,6 @@ Add a confirm flag (or remove --dry-run) only after reviewing the planned deleti
 
 ## Troubleshooting quick tips
 
-- If `feast apply` fails with Arrow schema merge errors, see TROUBLESHOOTING.md (Solution A).
+- If `feast apply` fails with Arrow schema merge errors, ensure partition columns are consistent (retain both `symbol` and `date` in files) and see TROUBLESHOOTING.md.
 - If registry is stale/corrupt: remove feature_repo/registry.db and re-apply.
 - If Redis is empty: run materialize or enable --push-online in the streaming ingestor.

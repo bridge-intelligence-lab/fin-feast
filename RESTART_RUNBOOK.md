@@ -129,7 +129,7 @@ make materialize
 - Mixed schemas or Arrow merge errors:
 ```bash
 rm -rf data/offline
-# Reapply Solution A in utils/io.py if not already
+# Ensure utils/io.py writes both partition columns (`symbol`, `date`) inside files
 # Regenerate data and re-apply
 ```
 

@@ -56,7 +56,7 @@ graph TD
 - Feast registry drift:
   - Remove `feature_repo/registry.db` and run `make apply`
 - Arrow merge error (schema):
-  - Remove `data/offline` and regenerate; ensure writer drops `symbol` inside files (Solution A)
+  - Remove `data/offline` and regenerate; ensure writer retains both partition columns (`symbol`, `date`) inside files to keep schemas consistent across partitions.
 
 ## Backfill and experiments
 - Backfill a large window via REST fetcher:

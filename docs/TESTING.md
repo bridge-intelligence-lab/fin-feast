@@ -55,7 +55,7 @@ sequenceDiagram
 - Docker not running or missing docker-compose: tests will fail to create Redis
 - Python version not 3.11: installation or runtime errors
 - Feature registry drift: remove feature_repo/registry.db and re-apply
-- Arrow merge errors: ensure you’re on Solution A (symbol not present in Parquet files)
+- Arrow merge errors: ensure partition columns are consistent (retain both `symbol` and `date` inside Parquet files)
 - Timestamps not UTC: always ensure `event_timestamp` is tz-aware and in UTC
 
 ## CI tips (if adding CI later)

@@ -107,7 +107,7 @@ data/offline/
 - File columns (per row):
   - Base: event_timestamp, open, high, low, close, vwap, volume
   - Indicators (precomputed): return_1, ma_5, ma_20, vol_20, rsi_14, atr_14
-- Important: To avoid Arrow merge conflicts, the `symbol` column is NOT written inside Parquet files; it is provided by the partition directory (Solution A). When reading for warm-starts, code injects `symbol` from the path.
+- Important: To avoid Arrow merge conflicts and satisfy tools that expect all partition keys present when any is present, we retain both partition columns (`symbol`, `date`) inside files and in the partition path. When reading for warm-starts, the code still injects `symbol` from the path if needed.
 
 ## Feast configuration
 - Entity: `symbol` (string)
@@ -120,4 +120,3 @@ data/offline/
 ## Freshness model
 - Batch: materialize-incremental schedule (e.g., every 60s) brings new Parquet rows to Redis
 - Streaming: push to online on each completed bar after computing indicators and writing Parquet; batch materialization still useful for healing/rebuilding
-
