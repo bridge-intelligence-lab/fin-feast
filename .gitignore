@@ -8,6 +8,13 @@ __pycache__/
 .uv/
 .env
 
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+
 # Editors/OS
 .idea/
 .vscode/

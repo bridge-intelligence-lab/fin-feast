@@ -2,6 +2,8 @@
 
 Offline-first Feast pipeline with Redis online store, using Polygon for data. Supports both batch (REST) and low-latency streaming (WebSocket) for minute bars, plus immutable experiment snapshots.
 
+[![CI](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml)
+
 ## Table of Contents
 - Architecture: docs/ARCHITECTURE.md
 - Usage: docs/USAGE.md
@@ -70,7 +72,19 @@ python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-onl
 See the repository tree in docs/ARCHITECTURE.md and the requirement.
 
 ## Testing
-- `pytest -q` runs the suite. Tests will spin up Redis via docker-compose automatically.
+- Unit tests: `pytest -q tests/unit`
+- Full suite: `pytest -q`
+- E2E tests may require Docker and network; CI runs unit tests by default.
+
+## Security and privacy
+- Do not commit secrets. Use `.env.example` as a template; `.env` is gitignored.
+- If a secret was previously committed, rotate it and scrub history before publishing.
+
+## License
+- MIT License. See LICENSE file.
+
+## Disclaimer
+- This repository is for educational purposes and should not be considered financial advice.
 
 ## Troubleshooting
 - See docs/TROUBLESHOOTING.md and RESTART_RUNBOOK.md
