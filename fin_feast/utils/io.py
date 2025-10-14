@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable
 
 import pandas as pd
 
@@ -56,6 +56,9 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
     Dask requires that if any partition column is present inside the file, then
     all partition columns must be present. We therefore retain both `symbol` and
     `date` in the file schema in addition to the partition path.
+
+    Concurrent safety: best-effort per-file lock using a sibling `.lock` file
+    combined with atomic temp+rename writes.
     """
     ensure_columns(df)
     df = normalize_schema(df)
@@ -63,24 +66,44 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
     df = df.copy()
     df["date"] = df["event_timestamp"].dt.strftime("%Y-%m-%d")
 
-    for (symbol, date), g in df.groupby(["symbol", df["event_timestamp"].dt.date]):
-        part_dir = partition_path(base, symbol, pd.Timestamp(date, tz="UTC").to_pydatetime())
+    # Group by computed date to avoid inconsistencies
+    for (symbol, date_str), g in df.groupby(["symbol", "date"], sort=False):
+        # date_str is YYYY-MM-DD
+        part_dir = partition_path(base, symbol, pd.Timestamp(date_str, tz="UTC").to_pydatetime())
         part_dir.mkdir(parents=True, exist_ok=True)
         file_path = part_dir / "data.parquet"
         g_sorted = g.sort_values("event_timestamp")
-        # Write atomically: write to temp file then rename
+        # Write atomically with a simple lock: write to temp file then rename
+        lock_path = file_path.with_suffix(".parquet.lock")
         tmp_path = file_path.with_suffix(".parquet.tmp")
-        if file_path.exists():
-            existing = pd.read_parquet(file_path)
-            combined = (
-                pd.concat([existing, g_sorted], ignore_index=True)
-                .drop_duplicates(subset=["event_timestamp"], keep="last")
-                .sort_values("event_timestamp")
-            )
-            combined.to_parquet(tmp_path, index=False)
-        else:
-            g_sorted.to_parquet(tmp_path, index=False)
-        tmp_path.replace(file_path)  # atomic on same filesystem
+        try:
+            # Acquire lock
+            while True:
+                try:
+                    with lock_path.open("x"):
+                        pass
+                    break
+                except FileExistsError:
+                    # Busy-wait briefly; for a more robust approach consider timeouts/backoff
+                    import time
+
+                    time.sleep(0.05)
+            if file_path.exists():
+                existing = pd.read_parquet(file_path)
+                combined = (
+                    pd.concat([existing, g_sorted], ignore_index=True)
+                    .drop_duplicates(subset=["event_timestamp"], keep="last")
+                    .sort_values("event_timestamp")
+                )
+                combined.to_parquet(tmp_path, index=False)
+            else:
+                g_sorted.to_parquet(tmp_path, index=False)
+            tmp_path.replace(file_path)  # atomic on same filesystem
+        finally:
+            from contextlib import suppress
+
+            with suppress(Exception):
+                lock_path.unlink(missing_ok=True)
         logger.info("Wrote %d rows to %s", len(g_sorted), file_path)
 
 
