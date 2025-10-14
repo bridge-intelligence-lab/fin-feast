@@ -39,15 +39,15 @@ make up
 ```bash
 make setup
 ```
-4. Generate synthetic data
+4. Generate synthetic data (via console script)
 ```bash
-python scripts/generate_synthetic_data.py --zone current --start 2025-09-01 --end 2025-10-12 --freq daily --symbols X:BTCUSD C:GBPUSD
-python scripts/generate_synthetic_data.py --zone current --start 2025-10-01 --end 2025-10-12 --freq minute --symbols X:BTCUSD C:GBPUSD
+finfeast-generate --zone current --start 2025-09-01 --end 2025-10-12 --freq daily --symbols X:BTCUSD C:GBPUSD
+finfeast-generate --zone current --start 2025-10-01 --end 2025-10-12 --freq minute --symbols X:BTCUSD C:GBPUSD
 ```
-5. Apply + materialize
+5. Apply + materialize (via console script)
 ```bash
 make apply
-make materialize
+finfeast-materialize --zone current
 ```
 6. Online query
 ```bash
@@ -62,11 +62,13 @@ python service/binance_stream_ingestor.py --symbols X:BTCUSD C:ETHUSD --push-onl
 Notes:
 - Maps Feast symbols to Binance pairs: X:BTCUSD -> btcusdt, C:ETHUSD -> ethusdt
 - Writes partitioned Parquet and optionally pushes to Redis via Feast
+- Resilience: automatic reconnect with exponential backoff and jitter; online push errors are logged and do not stop ingestion
 
 Optional: Polygon streaming (requires POLYGON_API_KEY):
 ```bash
 python service/polygon_stream_ingestor.py --symbols X:BTCUSD C:GBPUSD --push-online
 ```
+- Resilience: online push errors are caught and logged; streaming continues
 
 ## Repo layout
 See the repository tree in docs/ARCHITECTURE.md and the requirement.

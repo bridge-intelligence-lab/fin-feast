@@ -72,6 +72,11 @@ python scripts/fetch_polygon_to_parquet.py --zone current --start YYYY-MM-DD --e
 - Logs: INFO by default (fin_feast/logging.py)
 - Consider redirecting materialize and streaming logs to files (see cron example), and rotating logs in production
 
+## Resilience and reliability (streaming)
+- Reconnects: streamers automatically reconnect with exponential backoff and jitter (Binance). Backoff resets on successful connect.
+- Online push isolation: failures to write to the online store are caught and logged; ingestion continues and Parquet remains the source of truth.
+- Warm start: both streamers warm start from recent Parquet data to compute indicators (bounded window).
+
 ## HA considerations (beyond POC)
 - Redis persistence (AOF) enabled; for higher durability, consider managed Redis or Redis Cluster
 - Multiple ingestor instances: ensure exactly-once semantics via idempotent partition writes keyed by (symbol, event_timestamp)
