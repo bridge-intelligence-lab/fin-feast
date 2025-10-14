@@ -13,3 +13,12 @@ repos:
       - id: check-ast
       - id: check-yaml
       - id: check-toml
+  - repo: local
+    hooks:
+      - id: pytest-unit
+        name: unit tests (pre-push)
+        entry: pytest
+        language: system
+        pass_filenames: false
+        args: ["-q", "tests/unit", "-m", "not integration and not network"]
+        stages: [push]

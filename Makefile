@@ -17,11 +17,15 @@ help:
 	@echo "  query           - run online query demo"
 	@echo "  prune           - dry-run retention pruning"
 	@echo "  test            - run pytest"
+	@echo "  test-unit       - run unit tests only (skip integration/network)"
+	@echo "  test-int        - run integration tests"
+	@echo "  test-e2e        - run e2e tests"
 	@echo "  lint / format   - ruff check / format"
 	@echo "  clean           - remove offline data (current/experiments) and registry"
 	@echo "  env-current     - print export commands for current zone"
 	@echo "  env-experiment  - print export commands for experiment zone"
 	@echo "  env-show        - print current env and resolved base path"
+
 
 .PHONY: help setup up down apply materialize synth-daily synth-minute poly-daily poly-minute train-ds query prune test lint format clean
 
@@ -54,6 +58,16 @@ apply-experiment:
 
 test:
 	pytest -q
+
+test-unit:
+	pytest -q tests/unit -m "not integration and not network"
+
+test-int:
+	pytest -q -m "integration"
+
+test-e2e:
+	pytest -q tests/e2e -s
+
 
 materialize:
 	@Z=$${FEAST_EXPERIMENT_ID:-}; \
@@ -91,6 +105,16 @@ prune:
 
 test:
 	pytest -q
+
+test-unit:
+	pytest -q tests/unit -m "not integration and not network"
+
+test-int:
+	pytest -q -m "integration"
+
+test-e2e:
+	pytest -q tests/e2e -s
+
 
 lint:
 	ruff check .
