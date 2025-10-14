@@ -68,6 +68,8 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
         part_dir.mkdir(parents=True, exist_ok=True)
         file_path = part_dir / "data.parquet"
         g_sorted = g.sort_values("event_timestamp")
+        # Write atomically: write to temp file then rename
+        tmp_path = file_path.with_suffix(".parquet.tmp")
         if file_path.exists():
             existing = pd.read_parquet(file_path)
             combined = (
@@ -75,9 +77,10 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
                 .drop_duplicates(subset=["event_timestamp"], keep="last")
                 .sort_values("event_timestamp")
             )
-            combined.to_parquet(file_path, index=False)
+            combined.to_parquet(tmp_path, index=False)
         else:
-            g_sorted.to_parquet(file_path, index=False)
+            g_sorted.to_parquet(tmp_path, index=False)
+        tmp_path.replace(file_path)  # atomic on same filesystem
         logger.info("Wrote %d rows to %s", len(g_sorted), file_path)
 
 
