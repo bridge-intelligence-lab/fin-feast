@@ -47,6 +47,9 @@ def _chunks(start: datetime, end: datetime, freq: str) -> Iterator[tuple[datetim
     while cur <= end:
         nxt = min(end, cur + step)
         yield cur, nxt
+        # Ensure forward progress even if boundaries equal
+        if nxt >= end:
+            break
         cur = nxt + (timedelta(seconds=0) if freq == "daily" else timedelta(minutes=0))
 
 
@@ -58,9 +61,32 @@ def _fetch_klines(symbol: str, interval: str, start: datetime, end: datetime) ->
         "endTime": int(end.timestamp() * 1000),
         "limit": 1000,
     }
-    resp = requests.get(BINANCE_KLINES, params=params, timeout=30)
-    resp.raise_for_status()
-    data = resp.json()
+    # Separate connect/read timeouts to avoid long hangs on connect
+    timeout = (5, 30)
+
+    # Lightweight retry loop
+    attempts = 3
+    last_exc: Exception | None = None
+    for i in range(1, attempts + 1):
+        try:
+            if os.getenv("DEBUG_FETCH") == "1":
+                print(f"[BINANCE] GET {BINANCE_KLINES} params={params} attempt={i}/{attempts}")
+            resp = requests.get(BINANCE_KLINES, params=params, timeout=timeout)
+            resp.raise_for_status()
+            data = resp.json()
+            break
+        except Exception as e:
+            last_exc = e
+            if i == attempts:
+                raise
+            # brief backoff
+            import time as _time
+
+            _time.sleep(0.5 * i)
+    else:
+        # Should not reach
+        data = []
+
     if not data:
         return pd.DataFrame(columns=["event_timestamp", "open", "high", "low", "close", "volume"])
     rows = []
@@ -95,10 +121,18 @@ def main() -> None:
         binance_sym = to_binance_symbol(feast_sym).upper()
         all_rows: List[pd.DataFrame] = []
         for s, e in _chunks(start.to_pydatetime(), end.to_pydatetime(), args.freq):
+            if os.getenv("DEBUG_FETCH") == "1":
+                print(f"[BINANCE] fetching {binance_sym} {interval} from {s} to {e}")
             df = _fetch_klines(binance_sym, interval, s, e)
+            if os.getenv("DEBUG_FETCH") == "1":
+                print(f"[BINANCE] got {len(df)} rows for {binance_sym} {interval} from {s} to {e}")
             if df.empty:
                 continue
             all_rows.append(df)
+            # small politeness delay between chunk requests
+            import time as _time
+
+            _time.sleep(0.2)
         if not all_rows:
             logger.warning("No data for %s", feast_sym)
             continue
