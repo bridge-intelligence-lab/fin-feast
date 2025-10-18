@@ -1,1 +1,30 @@
-from __future__ import annotations\n\nfrom datetime import datetime, timedelta\nfrom pathlib import Path\n\nfrom scripts.prune_retention import prune_dir\n\n\ndef _mk_part(base: Path, sym: str, date_str: str) -> Path:\n    d = base / f\"symbol={sym}\" / f\"date={date_str}\"\n    d.mkdir(parents=True, exist_ok=True)\n    (d / \"data.parquet\").write_text(\"x\")\n    return d\n\n\ndef test_prune_retention_delete_and_dry_run(tmp_path: Path) -> None:\n    base = tmp_path\n    old = _mk_part(base, \"X:BTCUSD\", \"2024-01-01\")\n    new = _mk_part(base, \"X:BTCUSD\", \"2025-01-01\")\n\n    cutoff = datetime.fromisoformat(\"2024-06-01\")\n\n    # Dry run: nothing deleted\n    prune_dir(base, cutoff, dry_run=True)\n    assert old.exists() and new.exists()\n\n    # Actual: old deleted, new kept\n    prune_dir(base, cutoff, dry_run=False)\n    assert not old.exists()\n    assert new.exists()\n
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+
+from scripts.prune_retention import prune_dir
+
+
+def _mk_part(base: Path, sym: str, date_str: str) -> Path:
+    d = base / f"symbol={sym}" / f"date={date_str}"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "data.parquet").write_text("x")
+    return d
+
+
+def test_prune_retention_delete_and_dry_run(tmp_path: Path) -> None:
+    base = tmp_path
+    old = _mk_part(base, "X:BTCUSD", "2024-01-01")
+    new = _mk_part(base, "X:BTCUSD", "2025-01-01")
+
+    cutoff = datetime.fromisoformat("2024-06-01")
+
+    # Dry run: nothing deleted
+    prune_dir(base, cutoff, dry_run=True)
+    assert old.exists() and new.exists()
+
+    # Actual: old deleted, new kept
+    prune_dir(base, cutoff, dry_run=False)
+    assert not old.exists()
+    assert new.exists()

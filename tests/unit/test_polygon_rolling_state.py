@@ -1,1 +1,23 @@
-from __future__ import annotations\n\nfrom pathlib import Path\nimport pandas as pd\n\nfrom service.polygon_stream_ingestor import RollingState\nfrom fin_feast.utils.io import write_parquet_partitioned\n\n\ndef test_rolling_state_add_and_warm_start(tmp_path: Path) -> None:\n    base = tmp_path / \"minute\"\n    base.mkdir(parents=True, exist_ok=True)\n\n    # Seed one bar to disk to test warm_start\n    df = pd.DataFrame([\n        {\n            \"symbol\": \"X:BTCUSD\",\n            \"event_timestamp\": pd.Timestamp(\"2025-01-01T00:00:00Z\"),\n            \"open\": 1.0,\n            \"high\": 1.0,\n            \"low\": 1.0,\n            \"close\": 1.0,\n            \"vwap\": 1.0,\n            \"volume\": 1.0,\n        }\n    ])\n    write_parquet_partitioned(base, df)\n\n    st = RollingState(max_bars=5)\n    st.warm_start(base, [\"X:BTCUSD\"])  # should read the seeded bar\n    assert \"X:BTCUSD\" in st.buffers\n    assert len(st.buffers[\"X:BTCUSD\"]) >= 1\n\n    # Add a new bar\n    out = st.add_bar({\n        \"symbol\": \"X:BTCUSD\",\n        \"event_timestamp\": pd.Timestamp(\"2025-01-01T00:01:00Z\"),\n        \"open\": 1.0,\n        \"high\": 1.0,\n        \"low\": 1.0,\n        \"close\": 1.0,\n        \"vwap\": 1.0,\n        \"volume\": 1.0,\n    })\n    assert isinstance(out, pd.DataFrame)\n    assert not out.empty\n
+from __future__ import annotations
+
+import pandas as pd
+
+from service.polygon_rolling_state import PolygonRollingState
+
+
+def test_polygon_rolling_state_add_bar_minimal():
+    st = PolygonRollingState(window=5)
+    out = st.add_bar(
+        {
+            "symbol": "X:BTCUSD",
+            "event_timestamp": pd.Timestamp("2025-01-01T00:01:00Z"),
+            "open": 1.0,
+            "high": 1.0,
+            "low": 1.0,
+            "close": 1.0,
+            "vwap": 1.0,
+            "volume": 1.0,
+        }
+    )
+    assert isinstance(out, pd.DataFrame)
+    assert not out.empty
