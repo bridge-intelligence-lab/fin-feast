@@ -152,9 +152,5 @@ Apache-2.0. See [LICENSE](LICENSE).
 - Please report security issues privately: SECURITY.md (contact listed)
 - Do not commit secrets. Use `.env.example` as a template; `.env` is gitignored
 
-## ⚠️ Disclaimer
-This repository is for educational purposes and should not be considered financial advice.
 
 ---
-
-Note: Update the CI badge URL to your actual org/repo after publishing.
