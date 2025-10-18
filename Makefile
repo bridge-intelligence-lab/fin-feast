@@ -3,35 +3,39 @@ PIP=pip
 
 help:
 	@echo "Available targets:"
-	@echo "  setup           - install dev deps into current interpreter/venv"
-	@echo "  up / down       - docker-compose up/down Redis"
-	@echo "  apply           - feast apply with ODFV disabled"
-	@echo "  materialize     - run materialize_incremental.py (apply + materialize)"
-	@echo "  synth-daily     - generate synthetic daily data into current zone"
-	@echo "  synth-minute    - generate synthetic minute data into current zone"
-	@echo "  poly-daily      - fetch Polygon daily aggregates into current zone"
-	@echo "  poly-minute     - fetch Polygon minute aggregates into current zone"
-	@echo "  binance-stream  - run Binance streaming ingestor (no API key)"
-	@echo "  validate-stream - validate WS, parquet growth, and online features"
-	@echo "  train-ds        - build historical training dataset"
-	@echo "  query           - run online query demo"
-	@echo "  prune           - dry-run retention pruning"
-	@echo "  test            - run pytest"
-	@echo "  test-unit       - run unit tests only (skip integration/network)"
-	@echo "  test-int        - run integration tests"
-	@echo "  test-e2e        - run e2e tests"
-	@echo "  lint / format   - ruff check / format"
-	@echo "  clean           - remove offline data (current/experiments) and registry"
-	@echo "  env-current     - print export commands for current zone"
-	@echo "  env-experiment  - print export commands for experiment zone"
-	@echo "  env-show        - print current env and resolved base path"
+	@echo "  help                  - show this help"
+	@echo "  setup                 - install dev deps into current interpreter/venv"
+	@echo "  up / down             - docker-compose up/down Redis"
+	@echo "  apply                 - feast apply with ODFV disabled"
+	@echo "  materialize           - run materialize_incremental.py (apply + materialize)"
+	@echo "  synth-daily           - generate synthetic daily data into current zone"
+	@echo "  synth-minute          - generate synthetic minute data into current zone"
+	@echo "  poly-daily            - fetch Polygon daily aggregates into current zone"
+	@echo "  poly-minute           - fetch Polygon minute aggregates into current zone"
+	@echo "  binance-stream        - run Binance streaming ingestor (no API key)"
+	@echo "  validate-stream       - validate WS, parquet growth, and online features"
+	@echo "  train-ds              - build historical training dataset"
+	@echo "  query / query-odfv    - run online query demo (ODFV toggled on query-odfv)"
+	@echo "  prune                 - dry-run retention pruning"
+	@echo "  test                  - run full pytest suite"
+	@echo "  test-unit             - run unit tests only (skip integration/network)"
+	@echo "  test-int              - run integration tests"
+	@echo "  test-e2e              - run e2e tests"
+	@echo "  e2e                   - run core e2e scenarios"
+	@echo "  e2e-all               - run all e2e scenarios (includes Polygon, requires API key)"
+	@echo "  e2e-experiment        - run experiment training e2e (synthetic data)"
+	@echo "  lint / format         - ruff check / format"
+	@echo "  clean                 - remove offline data (current/experiments) and registry"
+	@echo "  env-current           - print export commands for current zone"
+	@echo "  env-experiment        - print export commands for experiment zone"
+	@echo "  env-show              - print current env and resolved base path"
 
 
 .PHONY: help setup up down apply materialize synth-daily synth-minute poly-daily poly-minute train-ds query prune test lint format clean
 
 setup:
 # 	$(PY) -m venv .venv
-# 	. .venv/bin/activate && 
+# 	. .venv/bin/activate &&
 	$(PIP) install -U pip
 	$(PIP) install -U ruff
 	$(PIP) install -U -e ".[dev]"
@@ -145,4 +149,3 @@ e2e-all: e2e
 
 e2e-experiment:
 	E2E_VERBOSE=1 pytest -q tests/e2e/test_e2e_experiment_training.py -s
-

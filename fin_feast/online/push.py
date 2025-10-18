@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 import pandas as pd
 from feast import FeatureStore
@@ -58,4 +58,4 @@ def push_rows_to_online(
         except Exception as e:
             last_err = e
             # If all variants failed, raise the last error
-            raise last_err
+            raise last_err from None

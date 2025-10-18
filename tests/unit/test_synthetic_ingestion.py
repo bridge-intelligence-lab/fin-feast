@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
 from fin_feast.features.rolling import add_indicators
-from fin_feast.utils.env import resolve_base_path
 from fin_feast.utils.io import write_parquet_partitioned
 
 

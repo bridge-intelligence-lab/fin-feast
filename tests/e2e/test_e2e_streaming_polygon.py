@@ -3,11 +3,10 @@ from __future__ import annotations
 import os
 import subprocess
 import time
-from pathlib import Path
 
 import pytest
 
-from .utils import run_shell, clean_and_up_redis, assert_ok, REPO_ROOT
+from .utils import REPO_ROOT, assert_ok, clean_and_up_redis, run_shell
 
 
 @pytest.mark.e2e

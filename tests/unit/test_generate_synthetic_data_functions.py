@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 
-from scripts.generate_synthetic_data import daterange, synthetic_series, gen_bars
+from scripts.generate_synthetic_data import daterange, gen_bars, synthetic_series
 
 
 def test_daterange_daily_and_minute():
-    start = datetime(2025, 1, 1, tzinfo=timezone.utc)
-    end = datetime(2025, 1, 3, tzinfo=timezone.utc)
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = datetime(2025, 1, 3, tzinfo=UTC)
     d = daterange(start, end, "daily")
     assert len(d) == 3
 
-    start_m = datetime(2025, 1, 1, tzinfo=timezone.utc)
-    end_m = datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc)
+    start_m = datetime(2025, 1, 1, tzinfo=UTC)
+    end_m = datetime(2025, 1, 1, 0, 2, tzinfo=UTC)
     m = daterange(start_m, end_m, "minute")
     assert len(m) == 3
 
@@ -27,8 +27,8 @@ def test_synthetic_series_shape_positive():
 
 def test_gen_bars_required_columns():
     ts = daterange(
-        datetime(2025, 1, 1, tzinfo=timezone.utc),
-        datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc),
+        datetime(2025, 1, 1, tzinfo=UTC),
+        datetime(2025, 1, 1, 0, 2, tzinfo=UTC),
         "minute",
     )
     df = gen_bars("X:BTCUSD", ts, 100.0)

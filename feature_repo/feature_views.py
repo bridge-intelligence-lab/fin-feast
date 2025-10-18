@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from datetime import timedelta
 import os
+from datetime import timedelta
 
+from data_sources import make_daily_ohlcv_source, make_minute_ohlcv_source
+from entities import symbol
 from feast import FeatureView, Field, OnDemandFeatureView
 from feast.types import Float64
-
-from entities import symbol
-from data_sources import make_daily_ohlcv_source, make_minute_ohlcv_source
 
 # Base features including precomputed indicators
 base_fields = [

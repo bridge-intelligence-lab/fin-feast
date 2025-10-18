@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from pathlib import Path
-from datetime import datetime, timezone
 import threading
 import time
+from datetime import UTC, datetime
+from pathlib import Path
 
 import pandas as pd
 
+import fin_feast.utils.env as env_mod
 from scripts.validate_streaming import (
-    _today_utc_date,
     _file_mtime,
     _partition_path,
     _read_partition_rows,
+    _today_utc_date,
     check_parquet_growth,
 )
-import fin_feast.utils.env as env_mod
 
 
 def test_today_utc_date_format():
@@ -45,7 +45,7 @@ def test_check_parquet_growth_zero_poll(tmp_path: Path, monkeypatch):
     base = env_mod.resolve_base_path(zone, None)
 
     # Initially empty
-    today = datetime.now(timezone.utc).date().isoformat()
+    today = datetime.now(UTC).date().isoformat()
     part = _partition_path(base, sym, "minute", today)
     assert _read_partition_rows(part) == 0
 
@@ -59,7 +59,7 @@ def test_check_parquet_growth_zero_poll(tmp_path: Path, monkeypatch):
             [
                 {
                     "symbol": sym,
-                    "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
+                    "event_timestamp": pd.Timestamp(datetime.now(UTC)),
                     "open": 1.0,
                     "high": 1.0,
                     "low": 1.0,
@@ -76,9 +76,7 @@ def test_check_parquet_growth_zero_poll(tmp_path: Path, monkeypatch):
             [
                 {
                     "symbol": sym,
-                    "event_timestamp": pd.Timestamp(
-                        datetime.now(timezone.utc) + pd.Timedelta(seconds=1)
-                    ),
+                    "event_timestamp": pd.Timestamp(datetime.now(UTC) + pd.Timedelta(seconds=1)),
                     "open": 2.0,
                     "high": 2.0,
                     "low": 2.0,

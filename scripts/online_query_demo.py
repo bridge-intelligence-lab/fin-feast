@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+
 from feast import FeatureStore
 from feast.errors import FeatureViewNotFoundException
 

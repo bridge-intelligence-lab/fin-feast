@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pandas as pd
 
 from scripts.materialize_incremental import _ensure_partition_columns

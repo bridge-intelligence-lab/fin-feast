@@ -2,9 +2,8 @@ import argparse
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import List, Dict, Tuple
 
 import pandas as pd
 from feast import FeatureStore
@@ -19,7 +18,7 @@ AGG_CHANNEL = "AM"  # Polygon minute aggregates
 
 
 def _today_utc_date() -> str:
-    return datetime.now(timezone.utc).date().isoformat()
+    return datetime.now(UTC).date().isoformat()
 
 
 def _partition_path(base: Path, symbol: str, freq: str, date_str: str) -> Path:
@@ -45,14 +44,14 @@ def _file_mtime(path: Path) -> float:
 
 
 def check_parquet_growth(
-    zone: str, symbols: List[str], freq: str = "minute", poll_secs: int = 10
-) -> Tuple[bool, Dict[str, Tuple[int, int, float, float]]]:
+    zone: str, symbols: list[str], freq: str = "minute", poll_secs: int = 10
+) -> tuple[bool, dict[str, tuple[int, int, float, float]]]:
     base = resolve_base_path(zone, None)
     today = _today_utc_date()
-    before_rows: Dict[str, int] = {}
-    after_rows: Dict[str, int] = {}
-    before_mtime: Dict[str, float] = {}
-    after_mtime: Dict[str, float] = {}
+    before_rows: dict[str, int] = {}
+    after_rows: dict[str, int] = {}
+    before_mtime: dict[str, float] = {}
+    after_mtime: dict[str, float] = {}
 
     for sym in symbols:
         p = _partition_path(base, sym, freq, today)
@@ -88,9 +87,9 @@ def check_parquet_growth(
 
 
 class _WSCounter:
-    def __init__(self, symbols: List[str]):
+    def __init__(self, symbols: list[str]):
         self.symbols = set(symbols)
-        self.counts: Dict[str, int] = {s: 0 for s in symbols}
+        self.counts: dict[str, int] = {s: 0 for s in symbols}
 
     def handler(self, msg):
         # Polygon WS AM payloads may be list or dict depending on client
@@ -104,13 +103,15 @@ class _WSCounter:
 
 
 def check_ws_receive(
-    symbols: List[str], timeout: int = 20, provider: str = "binance"
-) -> Tuple[bool, Dict[str, int]]:
+    symbols: list[str], timeout: int = 20, provider: str = "binance"
+) -> tuple[bool, dict[str, int]]:
     counter = _WSCounter(symbols)
 
     if provider == "binance":
         # Simple binance WS check using websockets combined stream
-        import websockets, json
+        import json
+
+        import websockets
 
         def to_binance(sym: str) -> str:
             return "btcusdt" if sym == "X:BTCUSD" else ("ethusdt" if sym == "C:ETHUSD" else "")
@@ -118,8 +119,8 @@ def check_ws_receive(
         streams = "/".join([f"{to_binance(s)}@kline_1m" for s in symbols])
         url = f"wss://stream.binance.com:9443/stream?streams={streams}"
 
-        import threading
         import asyncio
+        import threading
 
         loop: asyncio.AbstractEventLoop | None = None
 
@@ -179,8 +180,8 @@ def check_ws_receive(
     # and run the async connect there with our callback.
     ws = WebSocketClient(subscriptions=[f"{AGG_CHANNEL}.{s}" for s in symbols], api_key=api_key)
 
-    import threading
     import asyncio
+    import threading
 
     stop_flag = {"stop": False}
     loop: asyncio.AbstractEventLoop | None = None
@@ -245,8 +246,8 @@ def check_ws_receive(
 
 
 def check_online_features(
-    symbols: List[str], repo_path: str | None = None
-) -> Tuple[bool, Dict[str, bool]]:
+    symbols: list[str], repo_path: str | None = None
+) -> tuple[bool, dict[str, bool]]:
     if repo_path is None:
         # Resolve repo root relative to this file
         repo_path = str((Path(__file__).resolve().parents[1] / "feature_repo").resolve())
@@ -277,7 +278,7 @@ def check_online_features(
             return resp[key2][idx]
         return None
 
-    ok_by_symbol: Dict[str, bool] = {}
+    ok_by_symbol: dict[str, bool] = {}
     for i, sym in enumerate(symbols):
         has_open = get_val("open", i) is not None
         has_close = get_val("close", i) is not None
@@ -318,12 +319,11 @@ def main():
     ws_ok, counts = check_ws_receive(args.symbols, timeout=args.ws_timeout, provider=args.provider)
     if ws_ok:
         logger.info("WS OK. Message counts: %s", counts)
+    elif args.ws_optional:
+        logger.warning("WS FAILED but continuing due to --ws-optional. Message counts: %s", counts)
     else:
-        if args.ws_optional:
-            logger.warning("WS FAILED but continuing due to --ws-optional. Message counts: %s", counts)
-        else:
-            logger.error("WS FAILED. Message counts: %s", counts)
-            overall_ok = False
+        logger.error("WS FAILED. Message counts: %s", counts)
+        overall_ok = False
 
     # 2) Parquet partition growth
     pq_ok, growth = check_parquet_growth(
@@ -334,18 +334,17 @@ def main():
             "Parquet growth OK. before->after (rows_before, rows_after, mtime_before, mtime_after): %s",
             growth,
         )
+    elif args.ws_optional:
+        logger.warning(
+            "Parquet growth FAILED but continuing due to --ws-optional. before->after: %s",
+            growth,
+        )
     else:
-        if args.ws_optional:
-            logger.warning(
-                "Parquet growth FAILED but continuing due to --ws-optional. before->after: %s",
-                growth,
-            )
-        else:
-            logger.error(
-                "Parquet growth FAILED. before->after (rows_before, rows_after, mtime_before, mtime_after): %s",
-                growth,
-            )
-            overall_ok = False
+        logger.error(
+            "Parquet growth FAILED. before->after (rows_before, rows_after, mtime_before, mtime_after): %s",
+            growth,
+        )
+        overall_ok = False
 
     # 3) Online check (optional)
     if args.check_online:

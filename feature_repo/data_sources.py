@@ -5,7 +5,7 @@ from pathlib import Path
 from feast import FileSource
 from feast.data_format import ParquetFormat
 
-from fin_feast.utils.env import get_zone, get_experiment_id, resolve_base_path
+from fin_feast.utils.env import get_experiment_id, get_zone, resolve_base_path
 
 
 def _base_path() -> Path:

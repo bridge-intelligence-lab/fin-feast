@@ -45,6 +45,25 @@ target-version = "py311"
 select = ["E", "F", "I", "UP", "B", "C4", "PIE", "PT", "RET", "SIM", "PTH", "PL" ]
 ignore = ["E501"]
 
+# Balance strictness: relax some rules in tests and imperative scripts.
+[tool.ruff.lint.per-file-ignores]
+# Tests can be longer, use literals, and have combined asserts.
+"tests/**/*" = [
+  "PLR0912",  # too many branches
+  "PLR0915",  # too many statements
+  "PLR2004",  # magic value used in comparison
+  "PT018",    # combined assertions
+  "PT011",    # broad raises in tests
+  "C405",     # set literal construction
+  "F841",     # intentionally unused locals in tests
+]
+# Allow longer/branchy CLI-style scripts while keeping safety rules.
+"scripts/build_training_dataset.py" = ["PLR0912", "PLR0915"]
+"scripts/fetch_polygon_to_parquet.py" = ["PLR0912"]
+"scripts/generate_synthetic_data.py" = ["SIM108", "PLR2004"]
+"scripts/fetch_binance_to_parquet.py" = ["SIM108", "F841"]
+"scripts/validate_streaming.py" = ["PLR0915", "SIM105"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"

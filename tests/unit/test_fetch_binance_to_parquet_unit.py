@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
 import pytest
 
 import scripts.fetch_binance_to_parquet as fb
@@ -24,8 +23,8 @@ class _Resp:
 def test_fetch_klines_and_write(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Mock requests.get to return two klines
     def fake_get(url, params=None, timeout=None):  # type: ignore[no-untyped-def]
-        ts0 = int(datetime(2025, 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
-        ts1 = int(datetime(2025, 1, 1, 0, 1, tzinfo=timezone.utc).timestamp() * 1000)
+        ts0 = int(datetime(2025, 1, 1, tzinfo=UTC).timestamp() * 1000)
+        ts1 = int(datetime(2025, 1, 1, 0, 1, tzinfo=UTC).timestamp() * 1000)
         klines = [
             [ts0, "1.0", "1.1", "0.9", "1.05", "10", ts0 + 60000, "", "", "", "", ""],
             [ts1, "1.05", "1.15", "0.95", "1.06", "11", ts1 + 60000, "", "", "", "", ""],
@@ -51,8 +50,8 @@ def test_fetch_klines_and_write(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     df = fb._fetch_klines(
         "BTCUSDT",
         "1m",
-        datetime(2025, 1, 1, tzinfo=timezone.utc),
-        datetime(2025, 1, 1, 0, 2, tzinfo=timezone.utc),
+        datetime(2025, 1, 1, tzinfo=UTC),
+        datetime(2025, 1, 1, 0, 2, tzinfo=UTC),
     )
     assert not df.empty
     df.insert(0, "symbol", "X:BTCUSD")

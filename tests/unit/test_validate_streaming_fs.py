@@ -1,5 +1,5 @@
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -26,7 +26,7 @@ def test_parquet_partition_detection(tmp_path: Path, monkeypatch):
     base = resolve_base_path(zone, None)
 
     # Initially no partition for today
-    today = datetime.now(timezone.utc).date().isoformat()
+    today = datetime.now(UTC).date().isoformat()
     p = _partition_path(base, symbol, "minute", today)
     assert _read_partition_rows(p) == 0
 
@@ -35,7 +35,7 @@ def test_parquet_partition_detection(tmp_path: Path, monkeypatch):
         [
             {
                 "symbol": symbol,
-                "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
+                "event_timestamp": pd.Timestamp(datetime.now(UTC)),
                 "open": 1.0,
                 "high": 1.0,
                 "low": 1.0,
@@ -53,7 +53,7 @@ def test_parquet_partition_detection(tmp_path: Path, monkeypatch):
         [
             {
                 "symbol": symbol,
-                "event_timestamp": pd.Timestamp(datetime.now(timezone.utc)),
+                "event_timestamp": pd.Timestamp(datetime.now(UTC)),
                 "open": 2.0,
                 "high": 2.0,
                 "low": 2.0,

@@ -48,4 +48,3 @@ ODFV source: minute_ohlcv_fv only (to avoid column collisions).
 
 ## Offline-online parity
 - All stateful indicators are precomputed offline to ensure the same values appear in the online store when materialized or pushed. ODFV remains lightweight and stateless.
-

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from feast import FeatureStore
@@ -83,7 +83,7 @@ def main() -> None:
     _ensure_partition_columns(project_root)
 
     fs = FeatureStore(repo_path=str(repo_dir))
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     logger.info("Materializing incrementally up to %s", now.isoformat())
     fs.materialize_incremental(end_date=now)
     logger.info("Done")

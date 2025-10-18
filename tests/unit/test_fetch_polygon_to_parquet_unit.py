@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pandas as pd
-
 from scripts.fetch_polygon_to_parquet import fetch_aggregates
 
 

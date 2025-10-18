@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from feast import FeatureStore
 
-from .utils import REPO_ROOT, run_shell, clean_and_up_redis, assert_ok
+from .utils import REPO_ROOT, assert_ok, clean_and_up_redis, run_shell
 
 
 @pytest.mark.e2e

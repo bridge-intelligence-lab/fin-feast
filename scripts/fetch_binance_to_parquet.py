@@ -1,16 +1,16 @@
 from __future__ import annotations
-import os
+
 import argparse
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import Iterator, List
+import os
+from collections.abc import Iterator
+from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
 
 from fin_feast.features.rolling import add_indicators
 from fin_feast.logging import get_logger
-from fin_feast.utils.env import resolve_base_path, Zone
+from fin_feast.utils.env import Zone, resolve_base_path
 from fin_feast.utils.io import write_parquet_partitioned
 from fin_feast.utils.symbols import to_binance_symbol
 
@@ -119,7 +119,7 @@ def main() -> None:
 
     for feast_sym in args.symbols:
         binance_sym = to_binance_symbol(feast_sym).upper()
-        all_rows: List[pd.DataFrame] = []
+        all_rows: list[pd.DataFrame] = []
         for s, e in _chunks(start.to_pydatetime(), end.to_pydatetime(), args.freq):
             if os.getenv("DEBUG_FETCH") == "1":
                 print(f"[BINANCE] fetching {binance_sym} {interval} from {s} to {e}")

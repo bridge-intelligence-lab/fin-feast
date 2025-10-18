@@ -1,17 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import List
+from datetime import UTC, datetime, timedelta
 
 import numpy as np
 import pandas as pd
 
 from fin_feast.features.rolling import add_indicators
 from fin_feast.logging import get_logger
-from fin_feast.utils.env import resolve_base_path
-from fin_feast.utils.env import Zone
+from fin_feast.utils.env import Zone, resolve_base_path
 from fin_feast.utils.io import write_parquet_partitioned
 
 logger = get_logger(__name__)
@@ -28,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def daterange(start: datetime, end: datetime, freq: str) -> List[datetime]:
+def daterange(start: datetime, end: datetime, freq: str) -> list[datetime]:
     if freq == "daily":
         step = timedelta(days=1)
     else:
@@ -50,7 +47,7 @@ def synthetic_series(start_price: float, n: int, vol: float = 0.02) -> np.ndarra
     return np.array(prices[1:])
 
 
-def gen_bars(symbol: str, ts_list: List[datetime], start_price: float) -> pd.DataFrame:
+def gen_bars(symbol: str, ts_list: list[datetime], start_price: float) -> pd.DataFrame:
     close = synthetic_series(
         start_price, len(ts_list), vol=0.001 if (ts_list[1] - ts_list[0]).seconds < 3600 else 0.02
     )
@@ -78,8 +75,8 @@ def main() -> None:
     base = resolve_base_path(zone, args.exp_id or None) / args.freq
     base.mkdir(parents=True, exist_ok=True)
 
-    start = datetime.fromisoformat(args.start).replace(tzinfo=timezone.utc)
-    end = datetime.fromisoformat(args.end).replace(tzinfo=timezone.utc)
+    start = datetime.fromisoformat(args.start).replace(tzinfo=UTC)
+    end = datetime.fromisoformat(args.end).replace(tzinfo=UTC)
 
     for sym in args.symbols:
         ts_list = daterange(start, end, args.freq)
