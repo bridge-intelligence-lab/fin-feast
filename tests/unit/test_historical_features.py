@@ -3,14 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-
 from feast import FeatureStore
 
 
 def test_historical_features(tmp_path: Path, monkeypatch) -> None:
     # Create experiment snapshot
     exp_id = "exp_test"
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     base = project_root / "data" / "offline" / "experiments" / exp_id
     daily = base / "daily"
     minute = base / "minute"
@@ -53,7 +52,7 @@ def test_historical_features(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("FEAST_DATA_ZONE", "experiment")
     monkeypatch.setenv("FEAST_EXPERIMENT_ID", exp_id)
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
 
     # Ensure a clean registry to avoid stale ODFV entries from previous runs
     reg_path = project_root / "feature_repo" / "registry.db"

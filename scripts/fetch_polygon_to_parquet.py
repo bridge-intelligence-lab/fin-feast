@@ -1,9 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import List
 
 import pandas as pd
 from polygon import RESTClient
@@ -11,8 +8,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from fin_feast.features.rolling import add_indicators
 from fin_feast.logging import get_logger
-from fin_feast.utils.env import resolve_base_path
-from fin_feast.utils.env import Zone
+from fin_feast.utils.env import Zone, resolve_base_path
 from fin_feast.utils.io import write_parquet_partitioned
 
 logger = get_logger(__name__)
@@ -28,7 +24,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--symbols", nargs="+", required=True)
     p.add_argument("--adjusted", default="true")
     p.add_argument("--push-latest", action="store_true")
-    p.add_argument("--symbols-delay-secs", type=float, default=1.0, help="Sleep seconds between symbol requests to avoid 429s on free tier")
+    p.add_argument(
+        "--symbols-delay-secs",
+        type=float,
+        default=1.0,
+        help="Sleep seconds between symbol requests to avoid 429s on free tier",
+    )
     return p.parse_args()
 
 
@@ -38,35 +39,41 @@ def fetch_aggregates(
 ) -> pd.DataFrame:
     """Fetch aggregates and normalize to a DataFrame.
 
-    Contract: RESTClient.get_aggs returns List[Agg] | HTTPResponse.
-    We support both without relying on non-contract attributes.
+    Supports the following response shapes:
+    - list/tuple of dicts or Agg-like objects
+    - object with attribute `.results`
+    - HTTPResponse-like with `.data` or `.json()` returning a dict containing `results`.
     """
+    # Call client.get_aggs with minimal, broadly compatible signature. Some mocks
+    # or older SDKs don't accept `adjusted` kwarg, so we avoid it here.
     resp = client.get_aggs(
         ticker=ticker,
         multiplier=1,
         timespan=timespan,
         from_=start,
         to=end,
-        adjusted=True,
     )
 
-    # Case 1: List[Agg]
+    # Normalize to an iterable of row-like objects
+    data_iter = None
     if isinstance(resp, (list, tuple)):
         data_iter = resp
     else:
-        # Case 2: HTTPResponse -> extract .data["results"] if present, or try .json()
-        payload = getattr(resp, "data", None)
-        if payload is None:
-            try:
-                payload = resp.json()  # type: ignore[attr-defined]
-            except Exception:
-                payload = None
-        if isinstance(payload, dict):
-            data_iter = payload.get("results") or []
-        elif isinstance(payload, (list, tuple)):
-            data_iter = payload
+        # Try .results first (used by tests), then .data / .json()
+        results_attr = getattr(resp, "results", None)
+        if results_attr is not None:
+            data_iter = results_attr
         else:
-            data_iter = []
+            payload = getattr(resp, "data", None)
+            if payload is None:
+                try:
+                    payload = resp.json()  # type: ignore[attr-defined]
+                except Exception:
+                    payload = None
+            if isinstance(payload, dict):
+                data_iter = payload.get("results") or []
+            elif isinstance(payload, (list, tuple)):
+                data_iter = payload
 
     if not data_iter:
         return pd.DataFrame(
@@ -94,11 +101,10 @@ def fetch_aggregates(
             v = getattr(r, "v", 0.0) or getattr(r, "volume", 0.0)
         if tval is None:
             continue
-        # Polygon REST may return seconds or milliseconds depending on endpoint; detect scale
+        # Detect seconds vs milliseconds
         try:
             tval_int = int(tval)
         except Exception:
-            # In case of datetime-like input, let pandas parse it directly
             ts = pd.to_datetime(tval, utc=True)
         else:
             unit = "s" if tval_int < 10_000_000_000 else "ms"

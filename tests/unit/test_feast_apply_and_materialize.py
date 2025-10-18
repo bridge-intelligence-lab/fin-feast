@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 from pathlib import Path
 
 import pandas as pd
 import pytest
-
 from feast import FeatureStore
 
 
@@ -22,7 +20,8 @@ def redis_stack():
 
 def test_apply_and_materialize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Prepare minimal offline data for minute inside project data dir
-    project_root = Path(__file__).resolve().parents[1]
+    # Ensure we point at real project root, not tests/ directory
+    project_root = Path(__file__).resolve().parents[2]
     data_dir = project_root / "data" / "offline" / "current" / "minute"
     if data_dir.exists():
         shutil.rmtree(data_dir)

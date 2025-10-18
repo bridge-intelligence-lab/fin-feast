@@ -13,7 +13,9 @@ def _should_verbose() -> bool:
     return os.getenv("E2E_VERBOSE") == "1"
 
 
-def run_shell(cmd: str, env: dict[str, str] | None = None, cwd: Path | None = None) -> subprocess.CompletedProcess:
+def run_shell(
+    cmd: str, env: dict[str, str] | None = None, cwd: Path | None = None
+) -> subprocess.CompletedProcess:
     """Run a shell command from repo root with .venv activation.
 
     Always prints the command. Prints stdout/stderr when E2E_VERBOSE=1 or on failure.
@@ -23,10 +25,19 @@ def run_shell(cmd: str, env: dict[str, str] | None = None, cwd: Path | None = No
         full_env.update(env)
     activate = REPO_ROOT / ".venv" / "bin" / "activate"
     if not activate.exists():
-        pytest.skip(".venv not found. Create it and install project: python -m venv .venv && . .venv/bin/activate && pip install -e .[dev]")
+        pytest.skip(
+            ".venv not found. Create it and install project: python -m venv .venv && . .venv/bin/activate && pip install -e .[dev]"
+        )
     bash_cmd = f"set -euo pipefail; . .venv/bin/activate; {cmd}"
     print(f"[E2E] RUN: {cmd}")
-    cp = subprocess.run(["bash", "-lc", bash_cmd], cwd=str(cwd or REPO_ROOT), env=full_env, capture_output=True, text=True)
+    cp = subprocess.run(
+        ["bash", "-lc", bash_cmd],
+        cwd=str(cwd or REPO_ROOT),
+        env=full_env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if cp.returncode != 0 or _should_verbose():
         print(f"[E2E] STDOUT (code={cp.returncode}):\n{cp.stdout}")
         print(f"[E2E] STDERR (code={cp.returncode}):\n{cp.stderr}")
@@ -42,9 +53,26 @@ def clean_and_up_redis() -> None:
     ]:
         cp = run_shell(cmd)
         if cp.returncode != 0:
-            raise AssertionError(f"Command failed: {cmd}\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}")
+            raise AssertionError(
+                f"Command failed: {cmd}\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}"
+            )
+
+    # Some Docker setups have a race where the network is not ready immediately
+    # after `docker-compose up -d`. Probe the network and container health briefly.
+    for _ in range(10):
+        cp = run_shell("docker ps --filter name=fin_feast_poc-redis-1")
+        if cp.returncode == 0 and "fin_feast_poc-redis-1" in cp.stdout:
+            # Also ensure the default network exists
+            net = run_shell("docker network inspect fin_feast_poc_default || true")
+            if net.returncode == 0:
+                break
+        import time
+
+        time.sleep(1)
 
 
 def assert_ok(cp: subprocess.CompletedProcess, context: str | None = None) -> None:
     if cp.returncode != 0:
-        raise AssertionError(f"{context or 'Command'} failed with code {cp.returncode}\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}")
+        raise AssertionError(
+            f"{context or 'Command'} failed with code {cp.returncode}\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}"
+        )
