@@ -8,8 +8,10 @@ import pandas as pd
 import pytest
 from feast import FeatureStore
 
+pytestmark = [pytest.mark.integration, pytest.mark.network]
 
-@pytest.fixture(scope="session", autouse=True)
+
+@pytest.fixture(scope="session")
 @pytest.mark.integration
 @pytest.mark.network
 def _redis_stack():

@@ -2,6 +2,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
+import pytest
+
+pytestmark = [pytest.mark.integration, pytest.mark.network]
 
 from fin_feast.utils.env import resolve_base_path
 from fin_feast.utils.io import write_parquet_partitioned
