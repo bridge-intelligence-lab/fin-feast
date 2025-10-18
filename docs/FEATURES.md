@@ -1,6 +1,6 @@
 # Feature Catalog
 
-This document describes all features exposed by the Feast POC, their definitions, and how they are computed.
+This document describes all features exposed by this project, their definitions, and how they are computed.
 
 ## Entities
 - symbol: string key identifying an instrument

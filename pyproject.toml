@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fin-feast"
 version = "0.1.0"
-description = "Feast POC for FX/Crypto using Polygon (Offline + Online with streaming)"
+description = "Offline-first feature workflows with optional streaming and online serving using Feast"
 readme = "README.md"
 authors = [{name = "Rodrigo Oliveira"}]
 requires-python = ">=3.11"

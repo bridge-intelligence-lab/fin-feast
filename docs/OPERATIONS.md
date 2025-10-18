@@ -10,7 +10,7 @@ This document describes how to operate the batch and streaming pipelines, schedu
 - Goal: keep online store fresh with new Parquet rows
 - Example (cron, every minute):
 ```
-* * * * * cd /path/to/fin-feast-poc && . .venv/bin/activate && python scripts/materialize_incremental.py >> logs/materialize.log 2>&1
+* * * * * cd /path/to/fin-feast && . .venv/bin/activate && python scripts/materialize_incremental.py >> logs/materialize.log 2>&1
 ```
 - Alternatively, a systemd timer or a simple loop can be used.
 
@@ -77,7 +77,7 @@ python scripts/fetch_polygon_to_parquet.py --zone current --start YYYY-MM-DD --e
 - Online push isolation: failures to write to the online store are caught and logged; ingestion continues and Parquet remains the source of truth.
 - Warm start: both streamers warm start from recent Parquet data to compute indicators (bounded window).
 
-## HA considerations (beyond POC)
+## HA considerations (production considerations)
 - Redis persistence (AOF) enabled; for higher durability, consider managed Redis or Redis Cluster
 - Multiple ingestor instances: ensure exactly-once semantics via idempotent partition writes keyed by (symbol, event_timestamp)
 - Monitoring and alerting for WS connectivity and lag

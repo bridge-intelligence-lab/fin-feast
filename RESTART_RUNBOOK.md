@@ -1,11 +1,11 @@
-# Feast Polygon POC — Restart + Operations Runbook
+# Feast — Restart + Operations Runbook
 
-This document helps you reset, run, and troubleshoot the Feast Polygon POC quickly, including a fix for the common PyArrow schema error and streaming guidance.
+This document helps you reset, run, and troubleshoot this Feast project quickly, including a fix for the common PyArrow schema error and streaming guidance.
 
 ## 1) Environment
 - Python: 3.11 (venv recommended)
 - Docker: docker-compose
-- Project root: `/home/rodrigo/repo/fin_feast_poc/`
+- Project root: `/home/rodrigo/repo/fin_feast/`
 
 Create and activate venv (example for Ubuntu):
 ```bash
@@ -147,7 +147,7 @@ PIP = $(PY) -m pip
 
 ## 11) Directory layout (key parts)
 ```
-fin-feast-poc/
+fin-feast/
   feature_repo/
     feature_store.yaml
     entities.py

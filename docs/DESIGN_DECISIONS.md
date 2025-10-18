@@ -1,6 +1,6 @@
 # Design Decisions (ADR-style)
 
-This file captures key decisions and rationale for the Fin Feast POC.
+This file captures key decisions and rationale for Fin Feast.
 
 ## ADR-001: Offline precompute of rolling indicators
 - Context: Indicators like MA, RSI, ATR require window state.
@@ -27,7 +27,7 @@ This file captures key decisions and rationale for the Fin Feast POC.
 - Consequence: Stateless transforms only; stateful indicators must be precomputed.
 
 ## ADR-005: Redis as online store
-- Context: Need a simple, fast online feature store for POC.
+- Context: Need a simple, fast online feature store for the project.
 - Decision: Use Redis via Feast's Redis online store.
 - Rationale: Easy local setup, good performance, supported by Feast.
 - Consequence: Consider managed Redis and HA configurations for production.

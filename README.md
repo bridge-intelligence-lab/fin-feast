@@ -1,16 +1,16 @@
 # 📈 Feast for Finance
-> Offline-first features with low-latency online serving, built on Feast for crypto/FX workflows.
+> Offline-first feature workflows with optional streaming and online serving using Feast.
 
-[![CI](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg) [![Docs](https://img.shields.io/badge/docs-index-blue)](docs/README.md) [![Ruff](https://img.shields.io/badge/lint-ruff-46aef7.svg)](https://github.com/astral-sh/ruff) [![Feast 0.38+](https://img.shields.io/badge/Feast-0.38%2B-00A1F1.svg)](https://feast.dev) [![Redis 7+](https://img.shields.io/badge/Redis-7%2B-d82c20.svg)](https://redis.io)
+[![CI](https://github.com/rodrigo-fonseca-oliveira/fin-feast/actions/workflows/ci.yml/badge.svg)](https://github.com/rodrigo-fonseca-oliveira/fin-feast/actions/workflows/ci.yml) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg) [![Docs](https://img.shields.io/badge/docs-index-blue)](docs/README.md) [![Ruff](https://img.shields.io/badge/lint-ruff-46aef7.svg)](https://github.com/astral-sh/ruff) [![Feast 0.38+](https://img.shields.io/badge/Feast-0.38%2B-00A1F1.svg)](https://feast.dev) [![Redis 7+](https://img.shields.io/badge/Redis-7%2B-d82c20.svg)](https://redis.io)
 
 ![Hero](docs/images/hero.png)
 
 ## Why Feast for Finance
-This project is a practical, batteries-included template for applying Feast to financial data (crypto/FX). It emphasizes an offline-first workflow for correctness and reproducibility, complemented by an online store for low-latency inference.
+This project provides a practical template for building offline-first feature workflows with optional online serving using Feast. It emphasizes correctness and reproducibility offline, with a low-latency online store for inference.
 
 ---
 
-## 💡 Use Cases
+## Use Cases
 | Scenario | Description |
 |-----------|--------------|
 | Experiment build | Precompute rolling indicators (returns, MAs, RSI, ATR) for consistent training data. |

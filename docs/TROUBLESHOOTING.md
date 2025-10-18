@@ -33,7 +33,7 @@ make up
 - Polygon (optional): Requires POLYGON_API_KEY. Use built-in retries (tenacity) in batch fetcher; extend WS reconnect/backoff as needed.
 
 ### 6) OnDemandFeatureView warnings
-- ODFV is experimental and not intended for heavy offline joins at scale. In this POC it’s used for lightweight stateless transforms only.
+- ODFV is experimental and not intended for heavy offline joins at scale. In this project it’s used for lightweight stateless transforms only.
 
 ### 7) Missing features online
 - Ensure recent materialize run (`make materialize`) or run the streamer with `--push-online`.

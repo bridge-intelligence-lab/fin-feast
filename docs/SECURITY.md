@@ -1,6 +1,6 @@
 # Security & Secrets
 
-This document covers secrets handling, Redis exposure, and basic hygiene for this POC.
+This document covers secrets handling, Redis exposure, and basic hygiene for this project.
 
 ## Secrets handling
 - Polygon API key is loaded from `.env` (`POLYGON_API_KEY`)
@@ -23,7 +23,7 @@ This document covers secrets handling, Redis exposure, and basic hygiene for thi
 - Ensure data directories are writable by the service user only
 - Rotate logs that may contain operational details; avoid logging secrets
 
-## Additional considerations (beyond POC)
+## Additional considerations (production considerations)
 - Use a secrets vault instead of .env
 - Audit logs for ingress/egress
 - Network policies to isolate Redis and service containers
