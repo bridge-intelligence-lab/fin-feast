@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from fin_feast.utils.io import read_recent_bars, write_partitioned_parquet
+from fin_feast.utils.io import read_recent_bars, write_parquet_partitioned
 
 
 def test_write_and_read_partitioned_parquet(tmp_path: Path) -> None:
@@ -24,7 +24,7 @@ def test_write_and_read_partitioned_parquet(tmp_path: Path) -> None:
         }
     )
 
-    files = write_partitioned_parquet(base, df)
+    files = write_parquet_partitioned(base, df)
     assert files, "No files written"
 
     loaded = pd.read_parquet(files[0])

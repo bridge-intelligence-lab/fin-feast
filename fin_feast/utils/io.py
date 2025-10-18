@@ -50,7 +50,7 @@ def partition_path(base: Path, symbol: str, ts: datetime) -> Path:
     return base / f"symbol={symbol}" / f"date={date_str}"
 
 
-def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
+def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> list[Path]:
     """Write hive-partitioned Parquet and retain partition columns in files.
 
     Dask requires that if any partition column is present inside the file, then
@@ -66,6 +66,7 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
     df = df.copy()
     df["date"] = df["event_timestamp"].dt.strftime("%Y-%m-%d")
 
+    written: list[Path] = []
     # Group by computed date to avoid inconsistencies
     for (symbol, date_str), g in df.groupby(["symbol", "date"], sort=False):
         # date_str is YYYY-MM-DD
@@ -99,12 +100,14 @@ def write_parquet_partitioned(base: Path, df: pd.DataFrame) -> None:
             else:
                 g_sorted.to_parquet(tmp_path, index=False)
             tmp_path.replace(file_path)  # atomic on same filesystem
+            written.append(file_path)
         finally:
             from contextlib import suppress
 
             with suppress(Exception):
                 lock_path.unlink(missing_ok=True)
         logger.info("Wrote %d rows to %s", len(g_sorted), file_path)
+    return written
 
 
 def read_recent_bars(base: Path, symbol: str, n: int) -> pd.DataFrame:
