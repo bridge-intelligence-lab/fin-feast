@@ -4,15 +4,20 @@ from pathlib import Path
 
 import pytest
 
-from fin_feast.utils.env import Paths, get_redis_cfg, get_retention_days
+from fin_feast.utils.env import get_redis_cfg, get_retention_days
 
 
 def test_paths_defaults(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Point CWD-like root to a temp dir using environment variables if Paths uses them,
     # otherwise construct directly from tmp dir.
-    p = Paths(base=tmp_path)
-    assert p.base == tmp_path
-    assert p.data_offline_current == tmp_path / "data" / "offline" / "current"
+    monkeypatch.setenv("FEAST_REPO_ROOT", str(tmp_path))
+    from fin_feast.utils.env import get_paths
+
+    p = get_paths()
+    assert p.repo_root == tmp_path
+    assert p.data_offline == tmp_path / "data" / "offline"
+    assert p.data_current_daily == tmp_path / "data" / "offline" / "current" / "daily"
+    assert p.data_current_minute == tmp_path / "data" / "offline" / "current" / "minute"
     assert p.data_experiments == tmp_path / "data" / "offline" / "experiments"
 
 

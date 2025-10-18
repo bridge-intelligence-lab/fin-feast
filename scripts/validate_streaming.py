@@ -89,7 +89,7 @@ def check_parquet_growth(
 class _WSCounter:
     def __init__(self, symbols: list[str]):
         self.symbols = set(symbols)
-        self.counts: dict[str, int] = {s: 0 for s in symbols}
+        self.counts: dict[str, int] = dict.fromkeys(symbols, 0)
 
     def handler(self, msg):
         # Polygon WS AM payloads may be list or dict depending on client
@@ -174,7 +174,7 @@ def check_ws_receive(
     api_key = os.getenv("POLYGON_API_KEY")
     if not api_key:
         logger.error("POLYGON_API_KEY not set in environment")
-        return False, {s: 0 for s in symbols}
+        return False, dict.fromkeys(symbols, 0)
 
     # In some versions, connect/close are async. We'll host an event loop in a background thread
     # and run the async connect there with our callback.

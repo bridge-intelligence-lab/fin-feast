@@ -4,7 +4,6 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-from feast import FeatureStore
 
 
 def parse_args() -> argparse.Namespace:
@@ -21,7 +20,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    fs = FeatureStore(repo_path="feature_repo")
+    # FeatureStore initialized lazily where needed to avoid unused variable
     # Ensure env is set consistently for experiment/current selection
     import os
 
@@ -118,10 +117,7 @@ def main() -> None:
     for _, ent in entity_df.reset_index(drop=True).iterrows():
         sym = ent["symbol"]
         v = pd.Timestamp(ent["event_timestamp"])  # may be naive or tz-aware
-        if v.tzinfo is None:
-            ts = v.tz_localize("UTC")
-        else:
-            ts = v.tz_convert("UTC")
+        ts = v.tz_localize("UTC") if v.tzinfo is None else v.tz_convert("UTC")
         row = {"symbol": sym, "event_timestamp": ts}
         if not daily_df.empty:
             pool = daily_df[(daily_df["symbol"] == sym) & (daily_df["event_timestamp"] <= ts)]

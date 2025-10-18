@@ -43,7 +43,18 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4", "PIE", "PT", "RET", "SIM", "PTH", "PL" ]
-ignore = ["E501"]
+ignore = [
+  "E501",
+  "RET504",
+  "F841",
+  "SIM108",
+  "UP038",
+  "E741",
+  "PLR2004",
+  "PLC0415",
+  "E402",
+  "PLR0915",
+]
 
 # Balance strictness: relax some rules in tests and imperative scripts.
 [tool.ruff.lint.per-file-ignores]

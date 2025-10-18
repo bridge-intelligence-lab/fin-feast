@@ -11,13 +11,12 @@ if str(ROOT) not in sys.path:
 
 import os
 import subprocess
-from pathlib import Path
 
 import pytest
 
 
 @pytest.fixture(scope="session", autouse=True)
-def set_env_repo_root() -> None:
+def _set_env_repo_root() -> None:
     # Ensure FEAST_DATA_ZONE defaults to current for tests unless overridden
     os.environ.setdefault("FEAST_DATA_ZONE", "current")
     os.environ.setdefault("FEAST_EXPERIMENT_ID", "")
@@ -26,7 +25,7 @@ def set_env_repo_root() -> None:
 @pytest.fixture(scope="session")
 @pytest.mark.integration
 @pytest.mark.network
-def redis_stack():
+def _redis_stack():
     subprocess.run(["docker-compose", "up", "-d"], check=True)
     yield
     subprocess.run(["docker-compose", "down"], check=True)

@@ -28,8 +28,7 @@ def compute_rsi(df: pd.DataFrame, window: int = 14) -> pd.Series:
         roll_up = up.rolling(window, min_periods=window).mean()
         roll_down = down.rolling(window, min_periods=window).mean()
         rs = roll_up / roll_down.replace(0, np.nan)
-        rsi = 100 - (100 / (1 + rs))
-        return rsi
+        return 100 - (100 / (1 + rs))
 
     return df.groupby("symbol")["close"].transform(rsi_series)
 
@@ -42,8 +41,9 @@ def compute_atr(df: pd.DataFrame, window: int = 14) -> pd.Series:
     tr2 = (df["high"] - df["prev_close"]).abs()
     tr3 = (df["low"] - df["prev_close"]).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    atr = tr.groupby(df["symbol"]).transform(lambda s: s.rolling(window, min_periods=window).mean())
-    return atr
+    return tr.groupby(df["symbol"]).transform(
+        lambda s: s.rolling(window, min_periods=window).mean()
+    )
 
 
 def add_indicators(df: pd.DataFrame) -> pd.DataFrame:

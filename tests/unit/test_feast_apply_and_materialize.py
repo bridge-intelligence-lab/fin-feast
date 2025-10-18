@@ -12,7 +12,7 @@ from feast import FeatureStore
 @pytest.fixture(scope="session", autouse=True)
 @pytest.mark.integration
 @pytest.mark.network
-def redis_stack():
+def _redis_stack():
     subprocess.run(["docker-compose", "up", "-d"], check=True)
     yield
     subprocess.run(["docker-compose", "down"], check=True)

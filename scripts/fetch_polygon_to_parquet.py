@@ -56,7 +56,7 @@ def fetch_aggregates(
 
     # Normalize to an iterable of row-like objects
     data_iter = None
-    if isinstance(resp, (list, tuple)):
+    if isinstance(resp, list | tuple):
         data_iter = resp
     else:
         # Try .results first (used by tests), then .data / .json()
@@ -72,7 +72,7 @@ def fetch_aggregates(
                     payload = None
             if isinstance(payload, dict):
                 data_iter = payload.get("results") or []
-            elif isinstance(payload, (list, tuple)):
+            elif isinstance(payload, list | tuple):
                 data_iter = payload
 
     if not data_iter:
@@ -87,7 +87,7 @@ def fetch_aggregates(
             tval = r.get("t") or r.get("timestamp")
             o = r.get("o") if r.get("o") is not None else r.get("open")
             h = r.get("h") if r.get("h") is not None else r.get("high")
-            l = r.get("l") if r.get("l") is not None else r.get("low")
+            low = r.get("l") if r.get("l") is not None else r.get("low")
             c = r.get("c") if r.get("c") is not None else r.get("close")
             vw = r.get("vw") if r.get("vw") is not None else r.get("vwap")
             v = r.get("v", 0.0) if r.get("v") is not None else r.get("volume", 0.0)
@@ -95,7 +95,7 @@ def fetch_aggregates(
             tval = getattr(r, "t", None) or getattr(r, "timestamp", None)
             o = getattr(r, "o", None) or getattr(r, "open", None)
             h = getattr(r, "h", None) or getattr(r, "high", None)
-            l = getattr(r, "l", None) or getattr(r, "low", None)
+            low = getattr(r, "l", None) or getattr(r, "low", None)
             c = getattr(r, "c", None) or getattr(r, "close", None)
             vw = getattr(r, "vw", None) or getattr(r, "vwap", None)
             v = getattr(r, "v", 0.0) or getattr(r, "volume", 0.0)
@@ -107,7 +107,8 @@ def fetch_aggregates(
         except Exception:
             ts = pd.to_datetime(tval, utc=True)
         else:
-            unit = "s" if tval_int < 10_000_000_000 else "ms"
+            TS_THRESHOLD_S = 10_000_000_000
+            unit = "s" if tval_int < TS_THRESHOLD_S else "ms"
             ts = pd.to_datetime(tval_int, unit=unit, utc=True)
         c = 0.0 if c is None else c
         vw = c if vw is None else vw
@@ -116,7 +117,7 @@ def fetch_aggregates(
                 "event_timestamp": ts,
                 "open": float(o),
                 "high": float(h),
-                "low": float(l),
+                "low": float(low),
                 "close": float(c),
                 "vwap": float(vw),
                 "volume": float(v),

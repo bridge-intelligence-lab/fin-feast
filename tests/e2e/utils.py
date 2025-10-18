@@ -60,10 +60,10 @@ def clean_and_up_redis() -> None:
     # Some Docker setups have a race where the network is not ready immediately
     # after `docker-compose up -d`. Probe the network and container health briefly.
     for _ in range(10):
-        cp = run_shell("docker ps --filter name=fin_feast_poc-redis-1")
-        if cp.returncode == 0 and "fin_feast_poc-redis-1" in cp.stdout:
+        cp = run_shell("docker ps --filter name=fin_feast-redis-1")
+        if cp.returncode == 0 and "fin_feast-redis-1" in cp.stdout:
             # Also ensure the default network exists
-            net = run_shell("docker network inspect fin_feast_poc_default || true")
+            net = run_shell("docker network inspect fin_feast_default || true")
             if net.returncode == 0:
                 break
         import time
