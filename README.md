@@ -1,7 +1,7 @@
 # 📈 Feast for Finance
 > Offline-first features with low-latency online serving, built on Feast for crypto/FX workflows.
 
-[![CI](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg) [![Docs](https://img.shields.io/badge/docs-index-blue)](docs/README.md) [![Ruff](https://img.shields.io/badge/lint-ruff-46aef7.svg)](https://github.com/astral-sh/ruff)
+[![CI](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/fin-feast-poc/actions/workflows/ci.yml) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg) [![Docs](https://img.shields.io/badge/docs-index-blue)](docs/README.md) [![Ruff](https://img.shields.io/badge/lint-ruff-46aef7.svg)](https://github.com/astral-sh/ruff) [![Feast 0.38+](https://img.shields.io/badge/Feast-0.38%2B-00A1F1.svg)](https://feast.dev) [![Redis 7+](https://img.shields.io/badge/Redis-7%2B-d82c20.svg)](https://redis.io)
 
 ![Hero](docs/images/hero.png)
 
@@ -63,6 +63,8 @@ finfeast-materialize --zone current
 
 # 5) Query online features (demo)
 python scripts/online_query_demo.py --symbols X:BTCUSD C:GBPUSD
+# Example output snippet
+# Symbol=X:BTCUSD | minute_ohlcv_fv:open=... close=... rsi_14=... ma_20=...
 ```
 
 ---
