@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The previous method of importing the `repo` module from the feature repository may not be robust or flexible enough for varying project structures.
+
+- **Work performed / experiment**: Refactored the import mechanism for the `repo` module in two test files (`test_feast_apply_and_materialize.py` and `test_historical_features.py`). Instead of a direct import, the code now dynamically loads the module using `importlib.util`, allowing for better handling of the module path.
+
+- **Result or outcome**: The tests can now correctly access the `repo` module regardless of the project's directory structure, improving the modularity and maintainability of the test code.
+
+- **Learning or next step**: Further testing is needed to ensure that this dynamic import method works consistently across different environments and project configurations. Additionally, consider documenting this approach for future reference and potential adoption in other parts of the codebase.
