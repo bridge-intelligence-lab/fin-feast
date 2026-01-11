@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need to streamline the testing process by differentiating between unit, integration, and end-to-end tests to improve efficiency and clarity in the testing workflow.
+
+- **Work performed / experiment**: Added a new pre-commit hook for running unit tests before pushing code and updated the Makefile to include separate commands for running unit tests, integration tests, and end-to-end tests.
+
+- **Result or outcome**: The code now supports distinct testing commands, allowing developers to run specific types of tests based on their needs, thereby enhancing the testing process and reducing the likelihood of integration issues.
+
+- **Learning or next step**: Monitor the effectiveness of the new testing structure and gather feedback from the development team to further refine the testing process and ensure it meets project requirements.
