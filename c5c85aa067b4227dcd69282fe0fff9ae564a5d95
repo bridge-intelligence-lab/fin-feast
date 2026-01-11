@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The initial approach of excluding the `symbol` column from Parquet files to avoid schema merge conflicts may lead to inconsistencies and operational complexities when reading data for warm-starts.
+
+- **Work performed / experiment**: Modified the CI workflow to run unit tests excluding integration and network tests. Updated documentation to reflect changes in the handling of partition columns in Parquet files, ensuring both `symbol` and `date` are retained in files and paths.
+
+- **Result or outcome**: The changes aim to eliminate schema merge conflicts and ensure consistent data structures across partitions, improving the reliability of data reads and warm-start processes.
+
+- **Learning or next step**: Monitor the impact of these changes on data processing and schema merging in practice, and adjust testing strategies to ensure comprehensive coverage of both unit and integration tests moving forward.
