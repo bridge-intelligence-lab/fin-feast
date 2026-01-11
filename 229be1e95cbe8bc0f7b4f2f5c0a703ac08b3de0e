@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The integration and network tests for the Feast feature store may not be properly marked or scoped, potentially affecting test execution and organization.
+
+- **Work performed / experiment**: Added pytest markers for integration and network tests in two test files (`test_feast_apply_and_materialize.py` and `test_validate_streaming_fs.py`) to ensure they are correctly categorized and executed in the appropriate context.
+
+- **Result or outcome**: The tests are now explicitly marked as integration and network tests, which improves clarity and ensures that they are executed in the correct testing environment.
+
+- **Learning or next step**: Monitor the execution of these tests to confirm that the new markers function as intended, and consider applying similar markers to other relevant tests for consistency and improved test management.
