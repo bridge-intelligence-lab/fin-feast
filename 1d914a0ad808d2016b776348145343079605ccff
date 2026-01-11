@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The implementation of concurrent file writing in the `write_parquet_partitioned` function may lead to data inconsistencies when multiple processes attempt to write to the same file simultaneously.
+
+- **Work performed / experiment**: Modified the `write_parquet_partitioned` function to include a locking mechanism using a `.lock` file to ensure concurrent safety during file writes. Additionally, refactored the grouping logic to use a pre-computed date string for partitioning.
+
+- **Result or outcome**: The updated function now safely handles concurrent writes by acquiring a lock before writing to the file, preventing data corruption. The grouping logic was also improved for consistency.
+
+- **Learning or next step**: Conduct further testing to evaluate the performance and reliability of the locking mechanism under high concurrency scenarios. Additionally, consider implementing more robust locking strategies, such as timeouts or exponential backoff, to enhance the system's resilience.
