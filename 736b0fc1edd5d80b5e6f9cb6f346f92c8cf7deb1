@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The existing function `write_partitioned_parquet` may not effectively return the paths of the written files, limiting its utility for tracking output files.
+
+- **Work performed / experiment**: The function `write_partitioned_parquet` was modified to return a list of `Path` objects representing the files written. This involved changing the return type and appending each file path to a list during the file writing process.
+
+- **Result or outcome**: The updated function now successfully returns a list of paths for the written Parquet files, enhancing its functionality for users needing to track or verify output files.
+
+- **Learning or next step**: Further testing will be conducted to ensure the new functionality works as intended, and additional unit tests will be created to validate the changes in `test_io_utils.py`. Additionally, the new `PolygonRollingState` class was introduced, which may require integration testing to assess its performance and interaction with existing components.
