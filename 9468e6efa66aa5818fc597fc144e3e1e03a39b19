@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need to improve documentation structure and clarify the architecture of the Feast pipeline for better understanding and usability.
+
+- **Work performed / experiment**: Enhanced the README.md file by adding a comprehensive Table of Contents and highlights, and created a new ARCHITECTURE.md document detailing the system architecture, including data flow and component interactions.
+
+- **Result or outcome**: The documentation is now more organized, making it easier for users to navigate and understand the architecture and features of the Feast pipeline. Key components and their interactions are clearly outlined.
+
+- **Learning or next step**: Continue to refine documentation based on user feedback and ensure that all new features and changes are promptly reflected in the documentation to maintain clarity and usability.
