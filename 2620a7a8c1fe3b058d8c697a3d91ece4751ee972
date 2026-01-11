@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need for an automated continuous integration (CI) workflow to ensure code quality and security in the project.
+
+- **Work performed / experiment**: Implemented a CI workflow in GitHub Actions that includes steps for setting up Python, caching dependencies, installing packages, linting code, running unit tests, and optional end-to-end tests. Additionally, a secrets scanning job was added to detect sensitive information in the codebase.
+
+- **Result or outcome**: Successfully created a structured CI pipeline that automates testing and code quality checks, enhancing the development process and reducing the risk of introducing errors or vulnerabilities.
+
+- **Learning or next step**: Monitor the CI pipeline's performance and effectiveness, and iterate on the workflow based on feedback and any issues encountered during its execution. Consider integrating additional testing frameworks or tools as needed.
