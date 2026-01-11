@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The integration testing process for the CI pipeline needs to be established to ensure compatibility and functionality of the application with Redis as the online store.
+
+- **Work performed / experiment**: Implemented a new integration testing job in the CI workflow (`ci.yml`) that includes steps for setting up Python, installing dependencies, starting Redis via Docker, running integration tests, and stopping Redis afterward. Additionally, updated the README to include a note about the CI badge and modified the SECURITY.md to correct the maintainer's email.
+
+- **Result or outcome**: Successfully added a structured integration testing process to the CI pipeline, which allows for automated testing of the application with Redis. The documentation was also updated for clarity and accuracy.
+
+- **Learning or next step**: Monitor the integration tests' performance and results in the CI pipeline to identify any issues or areas for improvement. Consider further enhancements to the testing framework based on feedback and results from these tests.
