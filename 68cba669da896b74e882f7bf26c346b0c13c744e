@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The team aimed to enhance the data ingestion process by integrating Binance streaming capabilities and validating the streaming data against existing symbols.
+
+- **Work performed / experiment**: Modifications were made to the Makefile to include new scripts for validating streaming data and ingesting data from Binance. The symbols used in various scripts were updated to include ETHUSD instead of GBPUSD. Documentation was also updated to reflect these changes and provide clearer instructions for using the Binance streaming ingestor.
+
+- **Result or outcome**: The changes successfully integrated the Binance streaming ingestor, allowing for real-time data ingestion and validation. The documentation now provides clearer guidance on using the new features, including symbol mappings and requirements.
+
+- **Learning or next step**: The next step involves testing the new Binance streaming functionality to ensure it operates as expected and meets performance requirements. Further exploration of the Polygon streaming option may also be considered for enhanced data aggregation.
