@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The team aimed to improve the handling of Parquet files and ensure compatibility with downstream consumers while maintaining the integrity of the data schema.
+
+- **Work performed / experiment**: Modifications were made to the Makefile to enhance installation commands and to the `write_parquet_partitioned` function to retain the `symbol` column in Parquet files. Additionally, a new function `make_daily_ohlcv_source` was created to encapsulate the creation of a `FileSource` with Parquet format.
+
+- **Result or outcome**: The changes ensured that the `symbol` column is included in the Parquet file schema, addressing the needs of downstream consumers. The Makefile updates improved clarity and usability for developers.
+
+- **Learning or next step**: The next step involves testing the updated functionality to confirm that downstream processes correctly utilize the `symbol` column and that the installation process works seamlessly across different environments.
