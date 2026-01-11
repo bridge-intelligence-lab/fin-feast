@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The existing Makefile lacked clarity and completeness in the help section, potentially leading to confusion among developers regarding available commands and their functionalities.
+
+- **Work performed / experiment**: Updated the Makefile to enhance the help section by adding missing commands, clarifying existing ones, and improving the overall structure for better readability.
+
+- **Result or outcome**: The help command now provides a comprehensive list of available targets, including new commands for end-to-end (e2e) testing scenarios and clearer descriptions, which improves developer usability.
+
+- **Learning or next step**: Monitor developer feedback on the updated help section to ensure it meets their needs, and consider further enhancements based on usage patterns or additional features that may be introduced in the future.
