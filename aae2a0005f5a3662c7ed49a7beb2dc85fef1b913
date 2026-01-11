@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The implementation of a delay mechanism between requests to avoid hitting rate limits (HTTP 429 errors) when fetching data from the Polygon API on a free tier.
+
+- **Work performed / experiment**: Added a new command-line argument `--symbols-delay-secs` to specify the delay in seconds between symbol requests. Modified the loop that processes symbols to include a sleep function, which pauses execution for the specified duration after each request, except for the last symbol.
+
+- **Result or outcome**: The code now includes a mechanism to throttle requests to the Polygon API, reducing the likelihood of encountering rate limit errors, thereby improving the reliability of data fetching.
+
+- **Learning or next step**: Monitor the performance of the updated implementation to ensure that the delay effectively prevents HTTP 429 errors. Consider adjusting the delay duration based on observed API response behavior and user feedback.
