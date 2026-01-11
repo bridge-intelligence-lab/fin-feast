@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The initial implementation of the data fetching process from Binance may lead to long hangs during connection issues and does not ensure proper handling of edge cases when the start and end boundaries are equal.
+
+- **Work performed / experiment**: Enhanced the `_fetch_klines` function by implementing a retry mechanism with separate connection and read timeouts, allowing for lightweight retries in case of failures. Added debug logging for better traceability and introduced a politeness delay between chunk requests to avoid overwhelming the API.
+
+- **Result or outcome**: The updated code successfully handles connection timeouts more gracefully, reduces the likelihood of long hangs, and provides better logging for debugging purposes. The retry mechanism ensures that transient errors do not cause the entire fetch operation to fail.
+
+- **Learning or next step**: The implementation demonstrates improved robustness in data fetching. Future steps may include further optimizing the retry logic and exploring additional error handling strategies to enhance reliability under various network conditions.
