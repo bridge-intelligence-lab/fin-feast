@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The implementation of atomic file writing for parquet files may improve data integrity during concurrent writes, but its effectiveness and impact on performance need to be validated.
+
+- **Work performed / experiment**: Modified the `write_parquet_partitioned` function to write to a temporary file before renaming it to the final file name, ensuring atomic writes. Additionally, updated test configurations to include integration and network markers for better test categorization.
+
+- **Result or outcome**: The code now supports atomic writes for parquet files, which should prevent data corruption during concurrent access. The test suite has been enhanced to include integration tests that require network access, improving the robustness of the testing framework.
+
+- **Learning or next step**: Monitor the performance and reliability of the new atomic write implementation in production. Conduct further integration tests to ensure that the new configurations work as intended and do not introduce regressions.
