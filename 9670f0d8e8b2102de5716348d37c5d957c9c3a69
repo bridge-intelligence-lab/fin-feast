@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The existing implementation of the Binance stream ingestor may not handle WebSocket reconnections efficiently, potentially leading to delays or failures in data ingestion.
+
+- **Work performed / experiment**: The code was modified to implement an exponential backoff strategy with jitter for WebSocket reconnection attempts. This involved adjusting the error handling logic to include a delay that increases with each failed attempt, capped at a maximum delay.
+
+- **Result or outcome**: The changes are expected to improve the robustness of the WebSocket connection by reducing the likelihood of overwhelming the server with reconnection attempts and allowing for a more graceful recovery from connection issues.
+
+- **Learning or next step**: Monitor the performance of the updated WebSocket reconnection strategy in a production environment to evaluate its effectiveness and make further adjustments if necessary. Additionally, consider applying similar error handling improvements to other streaming ingestors, such as the Polygon stream ingestor.
