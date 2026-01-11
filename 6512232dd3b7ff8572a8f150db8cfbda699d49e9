@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The existing CI workflow may not efficiently handle linting, testing, and integration processes, potentially leading to missed errors or inefficiencies in the development pipeline.
+
+- **Work performed / experiment**: The CI workflow was refactored to consolidate and streamline jobs. The integration job was removed, and linting and unit testing were integrated into a single job. Steps for caching, Redis setup, and integration tests were eliminated, focusing on essential linting and unit tests.
+
+- **Result or outcome**: The CI workflow is now more concise, with improved clarity and reduced complexity. The integration tests were removed from the main CI process, which may lead to faster feedback cycles for developers.
+
+- **Learning or next step**: Monitor the performance of the new CI workflow to ensure it meets the team's needs. Evaluate the impact of removing integration tests from the CI process and consider reintroducing them in a separate workflow if necessary.
