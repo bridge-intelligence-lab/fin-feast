@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The integration of new features and dependencies (Feast and Redis) into the existing project structure may impact functionality and performance.
+
+- **Work performed / experiment**: Updated the README.md file to include new badges for Feast and Redis versions, enhancing documentation clarity. Added a placeholder image to the documentation.
+
+- **Result or outcome**: The README now provides clearer information regarding the required versions of Feast and Redis, which aids users in setting up the environment correctly.
+
+- **Learning or next step**: Monitor user feedback on the updated documentation and assess if further enhancements are needed to improve clarity or usability.
