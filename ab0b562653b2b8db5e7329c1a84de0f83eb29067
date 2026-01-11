@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need for a structured code review process to ensure code quality, security, and compliance with best practices.
+
+- **Work performed / experiment**: Created two new documents: a "Code Review Checklist" to guide reviewers through essential areas such as security, CI/testing, data I/O, services, code quality, and documentation; and a "Code Review Tracker" to log findings from review sessions, including severity, status, and recommendations for each issue identified.
+
+- **Result or outcome**: Established a systematic approach for code reviews that enhances security, testing practices, and documentation consistency, while also tracking issues and recommendations for resolution.
+
+- **Learning or next step**: Implement the checklist and tracker in upcoming code reviews to identify and address potential issues systematically, and refine the documents based on feedback from the review process.
