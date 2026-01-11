@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The integration of type checking into the continuous integration (CI) workflow may improve code quality and reduce runtime errors by identifying type-related issues early in the development process.
+
+- **Work performed / experiment**: Added a type checking step using mypy to the CI workflow in `ci.yml`, created a new configuration file `mypy.ini` to define type checking rules, and updated `pyproject.toml` to include mypy as a development dependency.
+
+- **Result or outcome**: The CI workflow now includes type checking, which will help catch type-related errors during the development phase. The mypy configuration is set to enforce strict type checking rules, enhancing overall code reliability.
+
+- **Learning or next step**: Monitor the results of type checking in the CI pipeline to identify and address any type-related issues. Consider refining type annotations in the codebase based on feedback from mypy to further improve code quality.
