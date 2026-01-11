@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need to ensure consistent environment settings for feature extraction in different zones (experiment vs. production) and to optimize the data loading process for historical features.
+
+- **Work performed / experiment**: Modified the `build_training_dataset.py` script to set environment variables based on the specified zone and experiment ID. Implemented a manual point-in-time join to load features from parquet files for specified symbols, ensuring the data is correctly categorized and ordered.
+
+- **Result or outcome**: Successfully established a mechanism to manage environment settings dynamically and improved the data loading process by reading from daily and minute partitions, which enhances the efficiency of feature extraction.
+
+- **Learning or next step**: Validate the new feature extraction process with various datasets to ensure robustness and accuracy, and monitor performance metrics to assess the impact of these changes on the overall training dataset generation.
