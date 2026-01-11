@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need to manage different data zones (current and experiment) and streamline the environment setup for applying and materializing data using Feast.
+
+- **Work performed / experiment**: Enhanced the Makefile to include new commands for managing environment variables related to data zones and added functionality for applying configurations specific to current and experiment zones. Updated documentation to provide clear instructions for setting up the environment and executing end-to-end scenarios.
+
+- **Result or outcome**: The Makefile now supports distinct commands for applying configurations in both current and experiment zones, improving usability. The documentation includes quick links and a structured environment setup section, making it easier for users to follow.
+
+- **Learning or next step**: Validate the new commands and documentation with users to ensure clarity and effectiveness. Gather feedback for further improvements and consider additional scenarios that may require further enhancements to the Makefile or documentation.
