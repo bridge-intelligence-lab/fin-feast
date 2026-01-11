@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The existing symbol mapping functions for Binance and Polygon may not adequately handle all possible input symbols, leading to potential errors in symbol conversion.
+
+- **Work performed / experiment**: The code was modified to enhance the symbol mapping functions. The `to_binance_symbol` function was updated to accept an additional symbol format for Ethereum. A new function, `to_polygon_ticker`, was introduced to handle symbol conversion for Polygon, ensuring that crypto pairs use the correct prefix and that forex pairs are passed through unchanged.
+
+- **Result or outcome**: The changes improved the robustness of the symbol mapping functions, allowing for better handling of various input formats and reducing the likelihood of errors when converting symbols for different APIs.
+
+- **Learning or next step**: Further testing is required to validate the new symbol mapping functions with a wider range of input symbols, ensuring that all edge cases are handled correctly. Additionally, documentation should be updated to reflect the changes made to the symbol mapping logic.
