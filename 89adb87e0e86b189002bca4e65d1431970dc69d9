@@ -1,0 +1,7 @@
+- **Hypothesis or technical uncertainty**: The need to improve the usability and clarity of the Makefile for developers and users interacting with the project.
+
+- **Work performed / experiment**: Enhanced the Makefile by adding a `help` target that lists available commands and their descriptions. This includes commands for setup, data generation, streaming ingestion, validation, and cleaning. Additionally, a new documentation file (`E2E_SCENARIOS.md`) was created to provide detailed end-to-end scenarios for using the system.
+
+- **Result or outcome**: The Makefile now offers a clearer interface for users, making it easier to understand and execute various tasks. The new documentation provides comprehensive guidance on executing common workflows, improving user experience and onboarding.
+
+- **Learning or next step**: Monitor user feedback on the new Makefile and documentation to identify any further improvements or additional scenarios that may need to be documented. Consider integrating automated tests to ensure the commands work as expected.
