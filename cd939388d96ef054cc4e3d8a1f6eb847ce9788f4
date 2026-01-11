@@ -1,0 +1,11 @@
+- **Hypothesis or technical uncertainty**: The existing code structure and configurations may not optimize the performance of the feature computation and data fetching processes.
+
+- **Work performed / experiment**:
+  - Updated the pre-commit configuration to trigger checks during the pre-push stage instead of push.
+  - Refactored the `compute_rsi` and `compute_atr` functions for clarity and efficiency.
+  - Modified the `build_training_dataset.py` script to initialize the `FeatureStore` lazily.
+  - Enhanced type checking in `fetch_polygon_to_parquet.py` to use the new syntax for checking multiple types.
+
+- **Result or outcome**: The changes improved code clarity, ensured more efficient execution of feature computations, and optimized the initialization of resources. The pre-commit checks are now more effectively integrated into the development workflow.
+
+- **Learning or next step**: Monitor the impact of these changes on performance and maintainability. Consider further refactoring opportunities and additional optimizations based on feedback from the development team.
