@@ -27,8 +27,8 @@ Feast path against regressions.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Iterable, Sequence
 
 import pandas as pd
 
@@ -164,14 +164,13 @@ def compare_pit(
     base_path: str | Path,
     repo_path: str | Path = "feature_repo",
     feature_cols: Sequence[str] = FEATURE_COLS,
-    rtol: float = 1e-9,
-    atol: float = 1e-9,
 ) -> dict:
     """Run both engines on the same entity grid and diff them.
 
     Returns a summary dict with row counts, columns compared, the max absolute
     numeric difference, and any per-column mismatch counts. ``match`` is True
-    only when row counts agree and every numeric cell is within tolerance.
+    only when row counts agree and every numeric cell is within tolerance
+    (``rtol=atol=1e-9``).
     """
     import numpy as np
 
@@ -184,7 +183,7 @@ def compare_pit(
     for col in cols:
         a = pd.to_numeric(man[col], errors="coerce").to_numpy(dtype=float)
         b = pd.to_numeric(fe[col], errors="coerce").to_numpy(dtype=float)
-        ok = np.isclose(a, b, rtol=rtol, atol=atol, equal_nan=True)
+        ok = np.isclose(a, b, rtol=1e-9, atol=1e-9, equal_nan=True)
         diff = np.abs(a - b)
         if np.isfinite(diff).any():
             max_abs_diff = max(max_abs_diff, float(np.nanmax(diff[np.isfinite(diff)])))
