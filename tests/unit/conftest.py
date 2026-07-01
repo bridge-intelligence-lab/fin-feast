@@ -23,8 +23,6 @@ def _set_env_repo_root() -> None:
 
 
 @pytest.fixture(scope="session")
-@pytest.mark.integration
-@pytest.mark.network
 def _redis_stack():
     subprocess.run(["docker-compose", "up", "-d"], check=True)
     yield
